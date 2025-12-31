@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server/server.js",
     "dev": "nodemon server/server.js",
-    "stop": "fuser -k 3001/tcp 2>/dev/null || (lsof -t -i:3001 | xargs -r kill -9) || true"
+    "stop": "sh -c \"pid=$(lsof -t -i:3001); if [ -n \\\"$pid\\\" ]; then kill -9 $pid; fi\""
   },
   "dependencies": {
     "body-parser": "^1.20.2",
