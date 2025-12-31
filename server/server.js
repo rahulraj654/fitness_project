@@ -119,22 +119,34 @@ app.get('/api/user', (req, res) => {
     res.json({ user: req.session.user });
 });
 
-// Helper to read data
+// Helper to read data (Titan Gainz Structure)
 const readData = () => {
     try {
         if (!fs.existsSync(DATA_PATH)) {
             const initialData = {
-                stats: { workouts: 0, caloriesBurned: 0, streak: 0, activeMinutes: 0 },
-                activities: []
+                user: { weight: 67, streak: 0, startDate: new Date().toISOString().split('T')[0] },
+                dailyLogs: [],
+                workoutHistory: {}
             };
             fs.writeFileSync(DATA_PATH, JSON.stringify(initialData, null, 2));
             return initialData;
         }
         const data = fs.readFileSync(DATA_PATH, 'utf8');
-        return JSON.parse(data);
+        let parsed = JSON.parse(data);
+
+        // Migration/Migration logic if it's the old structure
+        if (parsed.stats || parsed.activities) {
+            parsed = {
+                user: { weight: 67, streak: parsed.stats ? parsed.stats.streak : 0, startDate: new Date().toISOString().split('T')[0] },
+                dailyLogs: [],
+                workoutHistory: {}
+            };
+            saveData(parsed);
+        }
+        return parsed;
     } catch (err) {
         console.error('Error reading data:', err);
-        return { stats: { workouts: 0, caloriesBurned: 0, streak: 0, activeMinutes: 0 }, activities: [] };
+        return { user: { weight: 67, streak: 0, startDate: new Date().toISOString().split('T')[0] }, dailyLogs: [], workoutHistory: {} };
     }
 };
 
@@ -147,42 +159,58 @@ const saveData = (data) => {
     }
 };
 
-app.get('/api/stats', (req, res) => {
+// --- NEW TITAN GAINZ API ---
+
+app.get('/api/data', (req, res) => {
     const data = readData();
-    res.json(data.stats);
+    res.json(data);
 });
 
-app.get('/api/activities', (req, res) => {
+app.post('/api/update-nutrition', (req, res) => {
+    const { calories, protein, date } = req.body;
     const data = readData();
-    res.json(data.activities);
-});
 
-app.post('/api/activities', (req, res) => {
-    const { type, duration, calories } = req.body;
-    if (!type || !duration) {
-        return res.status(400).json({ error: 'Type and duration required' });
+    let log = data.dailyLogs.find(l => l.date === date);
+    if (!log) {
+        log = { date, calories: 0, protein: 0, workoutCompleted: false };
+        data.dailyLogs.push(log);
     }
 
-    const data = readData();
-    const newActivity = {
-        id: Date.now(),
-        type,
-        duration,
-        calories: parseInt(calories) || 0,
-        date: new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-    };
-
-    // Update Activities
-    data.activities.unshift(newActivity);
-
-    // Update Stats
-    data.stats.workouts += 1;
-    data.stats.caloriesBurned += newActivity.calories;
-    // (Simplistic streak logic for demo)
-    data.stats.streak = data.stats.streak || 1;
+    log.calories = calories;
+    log.protein = protein;
 
     saveData(data);
-    res.status(201).json(newActivity);
+    res.json({ success: true, log });
+});
+
+app.post('/api/log-workout', (req, res) => {
+    const { exercise, reps, weight, date } = req.body;
+    const data = readData();
+
+    // Update workout history
+    data.workoutHistory[exercise] = { lastReps: reps, lastWeight: weight };
+
+    // Mark today's workout as completed
+    let log = data.dailyLogs.find(l => l.date === date);
+    if (!log) {
+        log = { date, calories: 0, protein: 0, workoutCompleted: true };
+        data.dailyLogs.push(log);
+    } else {
+        log.workoutCompleted = true;
+    }
+
+    // Increment streak if not already counted today
+    // (Simplistic logic: if no workout was completed yesterday, streak resets? 
+    // For now, let's just keep it simple as a total count or manual)
+
+    saveData(data);
+    res.json({ success: true, workoutHistory: data.workoutHistory });
+});
+
+// Deprecated routes (for compatibility if needed)
+app.get('/api/stats', (req, res) => {
+    const data = readData();
+    res.json(data.user);
 });
 
 // Start Server
