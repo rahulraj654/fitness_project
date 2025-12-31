@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server/server.js",
     "dev": "nodemon server/server.js",
-    "stop": "fuser -k 3001/tcp || echo 'Port 3001 was already free'"
+    "stop": "fuser -k 3001/tcp || echo 'No process found on port 3001'"
   },
   "dependencies": {
     "body-parser": "^1.20.2",
