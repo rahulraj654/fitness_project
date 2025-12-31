@@ -5,9 +5,11 @@ const bodyParser = require('body-parser');
 const csrf = require('csurf');
 const morgan = require('morgan');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const DATA_PATH = path.join(__dirname, 'data.json');
 
 // --- Middlewares ---
 app.use(morgan('dev'));
@@ -117,26 +119,42 @@ app.get('/api/user', (req, res) => {
     res.json({ user: req.session.user });
 });
 
-// Mock Fitness Data
-let fitnessStats = {
-    workouts: 12,
-    caloriesBurned: 5420,
-    streak: 5,
-    activeMinutes: 1450
+// Helper to read data
+const readData = () => {
+    try {
+        if (!fs.existsSync(DATA_PATH)) {
+            const initialData = {
+                stats: { workouts: 0, caloriesBurned: 0, streak: 0, activeMinutes: 0 },
+                activities: []
+            };
+            fs.writeFileSync(DATA_PATH, JSON.stringify(initialData, null, 2));
+            return initialData;
+        }
+        const data = fs.readFileSync(DATA_PATH, 'utf8');
+        return JSON.parse(data);
+    } catch (err) {
+        console.error('Error reading data:', err);
+        return { stats: { workouts: 0, caloriesBurned: 0, streak: 0, activeMinutes: 0 }, activities: [] };
+    }
 };
 
-let activities = [
-    { id: 1, type: 'Running', duration: '45m', date: 'Today', calories: 450 },
-    { id: 2, type: 'Weightlifting', duration: '60m', date: 'Yesterday', calories: 320 },
-    { id: 3, type: 'Yoga', duration: '30m', date: 'Monday', calories: 150 }
-];
+// Helper to save data
+const saveData = (data) => {
+    try {
+        fs.writeFileSync(DATA_PATH, JSON.stringify(data, null, 2));
+    } catch (err) {
+        console.error('Error saving data:', err);
+    }
+};
 
 app.get('/api/stats', (req, res) => {
-    res.json(fitnessStats);
+    const data = readData();
+    res.json(data.stats);
 });
 
 app.get('/api/activities', (req, res) => {
-    res.json(activities);
+    const data = readData();
+    res.json(data.activities);
 });
 
 app.post('/api/activities', (req, res) => {
@@ -144,14 +162,26 @@ app.post('/api/activities', (req, res) => {
     if (!type || !duration) {
         return res.status(400).json({ error: 'Type and duration required' });
     }
+
+    const data = readData();
     const newActivity = {
-        id: activities.length + 1,
+        id: Date.now(),
         type,
         duration,
-        calories: calories || 0,
-        date: 'Just now'
+        calories: parseInt(calories) || 0,
+        date: new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
     };
-    activities.unshift(newActivity);
+
+    // Update Activities
+    data.activities.unshift(newActivity);
+
+    // Update Stats
+    data.stats.workouts += 1;
+    data.stats.caloriesBurned += newActivity.calories;
+    // (Simplistic streak logic for demo)
+    data.stats.streak = data.stats.streak || 1;
+
+    saveData(data);
     res.status(201).json(newActivity);
 });
 

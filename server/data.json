@@ -1,0 +1,31 @@
+{
+    "stats": {
+        "workouts": 12,
+        "caloriesBurned": 5420,
+        "streak": 5,
+        "activeMinutes": 1450
+    },
+    "activities": [
+        {
+            "id": 1,
+            "type": "Running",
+            "duration": "45m",
+            "date": "Today",
+            "calories": 450
+        },
+        {
+            "id": 2,
+            "type": "Weightlifting",
+            "duration": "60m",
+            "date": "Yesterday",
+            "calories": 320
+        },
+        {
+            "id": 3,
+            "type": "Yoga",
+            "duration": "30m",
+            "date": "Monday",
+            "calories": 150
+        }
+    ]
+}
