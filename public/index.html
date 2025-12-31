@@ -3,111 +3,423 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Fitness Project - Dashboard</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Dashboard - Fitness Project</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=JetBrains+Mono:wght@500&display=swap"
+        rel="stylesheet">
     <style>
         :root {
             --bg-base: #f3f6f8;
             --accent: #2563eb;
+            --accent-glow: rgba(37, 99, 235, 0.3);
+            --danger: #ef4444;
             --text-dark: #1e293b;
             --text-light: #64748b;
+            --card-surface: rgba(255, 255, 255, 0.75);
+            --card-border: rgba(255, 255, 255, 0.8);
+            --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+            --grad-1: linear-gradient(135deg, #3b82f6, #2563eb);
+            --grad-2: linear-gradient(135deg, #f97316, #ea580c);
+            --grad-3: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
         }
 
         body {
             font-family: 'Manrope', sans-serif;
             background-color: var(--bg-base);
             margin: 0;
-            padding: 0;
+            min-height: 100vh;
             color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        .ambient-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            background: #f8fafc;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.6;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .orb-1 {
+            width: 60vw;
+            height: 60vw;
+            background: #e0e7ff;
+            top: -10%;
+            left: -10%;
+            animation-delay: 0s;
+        }
+
+        .orb-2 {
+            width: 50vw;
+            height: 50vw;
+            background: #fff7ed;
+            bottom: -10%;
+            right: -10%;
+            animation-delay: -5s;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            50% {
+                transform: translate(30px, -30px) scale(1.1);
+            }
         }
 
         .navbar {
-            background: white;
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.7);
+            border-bottom: 1px solid var(--card-border);
             padding: 16px 32px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            sticky: top;
+            z-index: 100;
         }
 
         .brand {
             font-weight: 800;
-            font-size: 1.25rem;
+            font-size: 1.4rem;
+            color: var(--text-dark);
+            letter-spacing: -0.5px;
+        }
+
+        .brand span {
             color: var(--accent);
         }
 
         .btn-logout {
-            background: transparent;
-            border: 1px solid #e2e8f0;
-            padding: 8px 16px;
-            border-radius: 8px;
+            background: #f1f5f9;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 14px;
             cursor: pointer;
-            font-weight: 600;
+            font-weight: 700;
             color: var(--text-light);
+            font-size: 0.85rem;
             transition: all 0.2s;
         }
 
         .btn-logout:hover {
             background: #fee2e2;
             color: #ef4444;
-            border-color: #fecaca;
+            transform: translateY(-1px);
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1100px;
             margin: 40px auto;
-            padding: 0 20px;
+            padding: 0 24px;
         }
 
-        .stats-grid {
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: var(--text-light);
+            font-weight: 500;
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+        }
+
+        .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(12, 1fr);
             gap: 24px;
-            margin-top: 32px;
+        }
+
+        .card {
+            background: var(--card-surface);
+            backdrop-filter: blur(25px);
+            border: 1px solid var(--card-border);
+            border-radius: 32px;
+            padding: 28px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
         }
 
         .stat-card {
-            background: white;
-            padding: 24px;
-            border-radius: 24px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            grid-column: span 3;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
 
-        .stat-label {
+        @media (max-width: 900px) {
+            .stat-card {
+                grid-column: span 6;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .stat-card {
+                grid-column: span 12;
+            }
+        }
+
+        .stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        .stat-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2rem;
+            font-weight: 500;
+            letter-spacing: -1px;
+        }
+
+        .stat-lab {
             font-size: 0.85rem;
+            font-weight: 700;
             color: var(--text-light);
-            font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
-        .stat-value {
-            font-size: 2rem;
+        .main-panel {
+            grid-column: span 8;
+        }
+
+        .side-panel {
+            grid-column: span 4;
+        }
+
+        @media (max-width: 1000px) {
+
+            .main-panel,
+            .side-panel {
+                grid-column: span 12;
+            }
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
             font-weight: 800;
-            color: var(--text-dark);
+        }
+
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .activity-item {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+            border: 1px solid transparent;
+            transition: 0.2s;
+        }
+
+        .activity-item:hover {
+            border-color: rgba(37, 99, 235, 0.1);
+            background: #f8fafc;
+        }
+
+        .act-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .act-type {
+            font-weight: 800;
+            font-size: 1rem;
+        }
+
+        .act-date {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            font-weight: 600;
+        }
+
+        .act-right {
+            text-align: right;
+        }
+
+        .act-dur {
+            font-weight: 700;
+            color: var(--accent);
+            display: block;
+        }
+
+        .act-cal {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            font-weight: 600;
+        }
+
+        .quick-log {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            font-size: 0.95rem;
+            background: white;
+            transition: 0.2s;
+        }
+
+        .form-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .btn-add {
+            background: var(--grad-1);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
             margin-top: 8px;
         }
 
-        .loading {
-            text-align: center;
-            color: var(--text-light);
+        .btn-add:hover {
+            transform: scale(1.02);
+            filter: brightness(1.1);
         }
     </style>
 </head>
 
 <body>
+    <div class="ambient-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+
     <nav class="navbar">
-        <div class="brand">FitnessApp</div>
+        <div class="brand">Fitness<span>Project</span></div>
         <button id="logout-btn" class="btn-logout">Sign Out</button>
     </nav>
 
     <div class="container">
-        <h1>Welcome back!</h1>
-        <p class="subtitle">Here is your daily activity summary.</p>
+        <h1>Dashboard</h1>
+        <p class="subtitle">Welcome back, track your progress today.</p>
 
-        <div id="stats-container" class="stats-grid">
-            <div class="loading">Loading stats...</div>
+        <div class="dashboard-grid">
+            <!-- Stats Row -->
+            <div class="card stat-card">
+                <div class="stat-icon" style="background: var(--grad-1)">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                            d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                </div>
+                <div class="stat-lab">Workouts</div>
+                <div class="stat-val" id="stat-workouts">--</div>
+            </div>
+            <div class="card stat-card">
+                <div class="stat-icon" style="background: var(--grad-2)">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                            d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.99 7.99 0 0120 13a7.99 7.99 0 01-2.343 5.657z" />
+                    </svg>
+                </div>
+                <div class="stat-lab">Calories</div>
+                <div class="stat-val" id="stat-calories">--</div>
+            </div>
+            <div class="card stat-card">
+                <div class="stat-icon" style="background: var(--grad-3)">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div class="stat-lab">Streak</div>
+                <div class="stat-val" id="stat-streak">--</div>
+            </div>
+            <div class="card stat-card">
+                <div class="stat-icon" style="background: var(--accent)">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div class="stat-lab">Active Min</div>
+                <div class="stat-val" id="stat-active">--</div>
+            </div>
+
+            <!-- Content Row -->
+            <div class="card main-panel">
+                <div class="section-header">
+                    <div class="section-title">Recent Activities</div>
+                </div>
+                <div id="activity-list" class="activity-list">
+                    <div class="loading">Fetching records...</div>
+                </div>
+            </div>
+
+            <div class="card side-panel">
+                <div class="section-header">
+                    <div class="section-title">Quick Log</div>
+                </div>
+                <form id="log-form" class="quick-log">
+                    <input type="text" id="log-type" placeholder="Type (e.g. Running)" class="form-input" required>
+                    <input type="text" id="log-duration" placeholder="Duration (e.g. 45m)" class="form-input" required>
+                    <input type="number" id="log-calories" placeholder="Calories" class="form-input">
+                    <button type="submit" class="btn-add">Add Activity</button>
+                </form>
+            </div>
         </div>
     </div>
 

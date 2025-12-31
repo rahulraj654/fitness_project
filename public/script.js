@@ -7,7 +7,14 @@
 
     const els = {
         logoutBtn: document.getElementById('logout-btn'),
-        statsContainer: document.getElementById('stats-container')
+        activityList: document.getElementById('activity-list'),
+        logForm: document.getElementById('log-form'),
+        stats: {
+            workouts: document.getElementById('stat-workouts'),
+            calories: document.getElementById('stat-calories'),
+            streak: document.getElementById('stat-streak'),
+            active: document.getElementById('stat-active')
+        }
     };
 
     // --- Helper: Get Cookie by Name ---
@@ -18,22 +25,13 @@
         return null;
     }
 
-    // --- API HELPER (with CSRF token and error handling) ---
+    // --- API HELPER ---
     async function apiFetch(url, options = {}) {
         const headers = {
             'Content-Type': 'application/json',
+            'X-XSRF-Token': getCookie('XSRF-TOKEN') || '',
             ...options.headers
         };
-
-        // Add CSRF token for non-GET requests
-        if (options.method && options.method.toUpperCase() !== 'GET') {
-            const csrfToken = getCookie('XSRF-TOKEN');
-            if (csrfToken) {
-                headers['X-XSRF-Token'] = csrfToken;
-            } else {
-                console.warn('CSRF token not found in cookies');
-            }
-        }
 
         const config = {
             ...options,
@@ -44,81 +42,109 @@
 
         const response = await fetch(url, config);
 
-        // Handle authentication errors
         if (response.status === 401) {
             window.location.href = '/login.html';
             throw new Error('Unauthorized');
         }
 
-        // Handle CSRF errors
-        if (response.status === 403) {
-            console.error('CSRF token validation failed');
-            alert('Session expired. Please refresh the page.');
-            throw new Error('CSRF validation failed');
-        }
-
         if (response.ok) {
-            // Check content type before parsing json
             const contentType = response.headers.get("content-type");
             if (contentType && contentType.indexOf("application/json") !== -1) {
                 return response.json();
-            } else {
-                return null;
             }
+            return null;
         }
 
-        // Handle other errors
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error || `Request failed: ${response.status}`);
     }
 
     // --- Initialization ---
     async function init() {
-        if (!els.statsContainer) return; // Not on dashboard
+        if (!els.activityList) return;
 
         try {
-            // Fetch User Stats
-            const stats = await apiFetch(`${CONFIG.API_BASE_URL}/stats`);
-            renderStats(stats);
+            await Promise.all([
+                fetchStats(),
+                fetchActivities()
+            ]);
         } catch (error) {
-            console.error('Failed to load dashboard:', error);
-            els.statsContainer.innerHTML = '<p class="error">Failed to load data.</p>';
+            console.error('Initialization error:', error);
         }
     }
 
-    function renderStats(stats) {
-        if (!stats) return;
-
-        els.statsContainer.innerHTML = `
-            <div class="stat-card">
-                <div class="stat-label">Workouts</div>
-                <div class="stat-value">${stats.workouts}</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Calories Burned</div>
-                <div class="stat-value">${stats.caloriesBurned}</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Current Streak</div>
-                <div class="stat-value">${stats.streak} <span style="font-size:1rem">days</span></div>
-            </div>
-        `;
+    async function fetchStats() {
+        const stats = await apiFetch(`${CONFIG.API_BASE_URL}/stats`);
+        if (stats) {
+            els.stats.workouts.textContent = stats.workouts;
+            els.stats.calories.textContent = stats.caloriesBurned;
+            els.stats.streak.textContent = stats.streak;
+            els.stats.active.textContent = stats.activeMinutes;
+        }
     }
 
-    // --- Logout Interaction ---
+    async function fetchActivities() {
+        const activities = await apiFetch(`${CONFIG.API_BASE_URL}/activities`);
+        renderActivities(activities);
+    }
+
+    function renderActivities(list) {
+        if (!list || list.length === 0) {
+            els.activityList.innerHTML = '<div class="empty">No activities logged yet.</div>';
+            return;
+        }
+
+        els.activityList.innerHTML = list.map(item => `
+            <div class="activity-item">
+                <div class="act-info">
+                    <span class="act-type">${item.type}</span>
+                    <span class="act-date">${item.date}</span>
+                </div>
+                <div class="act-right">
+                    <span class="act-dur">${item.duration}</span>
+                    <span class="act-cal">${item.calories} cal</span>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // --- Add Activity ---
+    if (els.logForm) {
+        els.logForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            btn.disabled = true;
+
+            try {
+                const payload = {
+                    type: document.getElementById('log-type').value,
+                    duration: document.getElementById('log-duration').value,
+                    calories: parseInt(document.getElementById('log-calories').value) || 0
+                };
+
+                await apiFetch(`${CONFIG.API_BASE_URL}/activities`, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+
+                els.logForm.reset();
+                await Promise.all([fetchStats(), fetchActivities()]);
+            } catch (error) {
+                alert('Failed to log activity: ' + error.message);
+            } finally {
+                btn.disabled = false;
+            }
+        });
+    }
+
+    // --- Logout ---
     if (els.logoutBtn) {
         els.logoutBtn.addEventListener('click', async () => {
             try {
-                els.logoutBtn.disabled = true;
-                els.logoutBtn.textContent = '...';
-
                 await apiFetch('/logout', { method: 'POST' });
                 window.location.href = '/login.html';
             } catch (error) {
-                console.error('Logout error:', error);
-                alert('Logout failed. Please try again.');
-                els.logoutBtn.disabled = false;
-                els.logoutBtn.textContent = 'Sign Out';
+                alert('Logout failed');
             }
         });
     }

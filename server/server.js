@@ -117,16 +117,47 @@ app.get('/api/user', (req, res) => {
     res.json({ user: req.session.user });
 });
 
-// Placeholder for future Fitness API
+// Mock Fitness Data
+let fitnessStats = {
+    workouts: 12,
+    caloriesBurned: 5420,
+    streak: 5,
+    activeMinutes: 1450
+};
+
+let activities = [
+    { id: 1, type: 'Running', duration: '45m', date: 'Today', calories: 450 },
+    { id: 2, type: 'Weightlifting', duration: '60m', date: 'Yesterday', calories: 320 },
+    { id: 3, type: 'Yoga', duration: '30m', date: 'Monday', calories: 150 }
+];
+
 app.get('/api/stats', (req, res) => {
-    res.json({
-        workouts: 12,
-        caloriesBurned: 5400,
-        streak: 5
-    });
+    res.json(fitnessStats);
+});
+
+app.get('/api/activities', (req, res) => {
+    res.json(activities);
+});
+
+app.post('/api/activities', (req, res) => {
+    const { type, duration, calories } = req.body;
+    if (!type || !duration) {
+        return res.status(400).json({ error: 'Type and duration required' });
+    }
+    const newActivity = {
+        id: activities.length + 1,
+        type,
+        duration,
+        calories: calories || 0,
+        date: 'Just now'
+    };
+    activities.unshift(newActivity);
+    res.status(201).json(newActivity);
 });
 
 // Start Server
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+// Binding to '127.0.0.1' ensures the server is ONLY accessible locally (or via SSH tunnel)
+// and NOT exposed to the public internet directly.
+app.listen(PORT, '127.0.0.1', () => {
+    console.log(`Server running on http://127.0.0.1:${PORT}`);
 });
