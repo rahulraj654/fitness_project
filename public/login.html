@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Login - Fitness Project</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #f3f6f8; --accent: #2563eb; --danger: #ef4444; --text-dark: #1e293b;
+            --text-light: #64748b; --card-surface: rgba(255, 255, 255, 0.75);
+            --card-border: rgba(255, 255, 255, 0.8); --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        body { font-family: 'Manrope', sans-serif; background-color: var(--bg-base); margin: 0; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; color: var(--text-dark); }
+        .ambient-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; background: #f8fafc; }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.6; animation: float 20s infinite ease-in-out; }
+        .orb-1 { width: 60vw; height: 60vw; background: #e0e7ff; top: -10%; left: -10%; animation-delay: 0s; }
+        .orb-2 { width: 50vw; height: 50vw; background: #eef2ff; bottom: -10%; right: -10%; animation-delay: -5s; }
+        @keyframes float { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(30px, -30px) scale(1.1); } }
+        .app-card { width: 100%; max-width: 400px; background: var(--card-surface); backdrop-filter: blur(25px); border: 1px solid var(--card-border); border-radius: 32px; padding: 32px; box-shadow: var(--shadow); }
+        h1 { text-align: center; font-size: 1.5rem; margin-top: 0; margin-bottom: 24px; color: var(--text-dark); }
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-light); margin-bottom: 8px; }
+        .form-input { width: 100%; padding: 14px 16px; border: 1px solid #d1d5db; border-radius: 12px; font-size: 1rem; transition: border-color 0.2s, box-shadow 0.2s; }
+        .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); }
+        .btn-submit { width: 100%; padding: 16px; border-radius: 16px; border: none; font-size: 1rem; font-weight: 700; cursor: pointer; color: white; background: linear-gradient(135deg, #3b82f6, #2563eb); transition: background 0.2s, opacity 0.2s; }
+        .btn-submit:hover:not(:disabled) { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+        .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+        .error-message { text-align: center; margin-top: 16px; color: var(--danger); font-weight: 600; font-size: 0.9rem; display: none; padding: 12px; background: #fee2e2; border-radius: 12px; }
+        .rate-limit-msg { text-align: center; margin-top: 16px; color: #d97706; font-weight: 600; font-size: 0.85rem; display: none; padding: 12px; background: #fef3c7; border-radius: 12px; }
+    </style>
+</head>
+<body>
+    <div class="ambient-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+    <div class="app-card">
+        <h1>Login to continue</h1>
+        <form id="login-form" action="/login" method="POST" autocomplete="on">
+            <!-- CSRF Token will be injected automatically if handled by some templating engine or hidden input, 
+                 BUT standard 'csurf' middleware with `csrf({cookie: true})` usually expects it in a hidden field named '_csrf' 
+                 OR a header. Since this is a plain HTML form submission to /login, we should ideally inject it or 
+                 JS handles the submission.
+                 
+                 However, sticking to the provided code structure:
+                 The backend `app.use(csrfProtection)` will enforce it. 
+                 If we rely on form submit, we must include <input type="hidden" name="_csrf" value="...">
+                 Since this is static HTML, we can't inject it server-side easily without EJS/Pug.
+                 
+                 Workaround: We use JS to fetch the token from cookie and insert it, OR submit via JS.
+                 The provided script.js used fetch for everything. Let's make sure this form submits cleanly.
+            -->
+            
+            <div class="form-group">
+                <label for="username" class="form-label">Username</label>
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    class="form-input"
+                    autocomplete="username"
+                    required
+                    maxlength="100"
+                    aria-label="Username"
+                >
+            </div>
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    class="form-input"
+                    autocomplete="current-password"
+                    required
+                    maxlength="100"
+                    aria-label="Password"
+                >
+            </div>
+            <button type="submit" id="submit-btn" class="btn-submit">Sign In</button>
+            <p id="error-msg" class="error-message" role="alert">Invalid credentials. Please try again.</p>
+            <p id="rate-limit-msg" class="rate-limit-msg" role="alert">Too many attempts. Please wait before trying again.</p>
+        </form>
+    </div>
+<script>
+(function() {
+    'use strict';
+
+    const form = document.getElementById('login-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const errorMsg = document.getElementById('error-msg');
+    const rateLimitMsg = document.getElementById('rate-limit-msg');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+
+    // Check URL parameters for server-side errors
+    const urlParams = new URLSearchParams(window.location.search);
+
+    if (urlParams.has('error')) {
+        const errorType = urlParams.get('error');
+
+        if (errorType === 'rate_limit') {
+            rateLimitMsg.textContent = 'Too many attempts. Please wait 15 minutes before trying again.';
+            rateLimitMsg.style.display = 'block';
+            errorMsg.style.display = 'none';
+            submitBtn.disabled = true;
+            setTimeout(() => {
+                rateLimitMsg.style.display = 'none';
+                submitBtn.disabled = false;
+            }, 15 * 60 * 1000);
+        } else {
+            errorMsg.textContent = 'Invalid credentials. Please try again.';
+            errorMsg.style.display = 'block';
+            rateLimitMsg.style.display = 'none';
+        }
+    }
+
+    // CSRF Injection for Standard Form Submit
+    // Our server sets XSRF-TOKEN cookie. We read it and append input.
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+    }
+
+    const csrfToken = getCookie('XSRF-TOKEN');
+    if (csrfToken) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = '_csrf';
+        input.value = csrfToken;
+        form.appendChild(input);
+    }
+
+
+    // Form validation
+    form.addEventListener('submit', function(e) {
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value.trim();
+
+        // Clear any existing errors
+        errorMsg.style.display = 'none';
+        rateLimitMsg.style.display = 'none';
+
+        if (!username || !password) {
+            e.preventDefault();
+            errorMsg.textContent = 'Please enter both username and password.';
+            errorMsg.style.display = 'block';
+            return false;
+        }
+        
+        // Prevent double submission handled by browser mostly, but good UI practice
+        // We'll trust the form submit navigation here.
+        return true;
+    });
+    
+    // UI Logic to clear errors
+    let errorCleared = false;
+    function clearMessagesOnInput() {
+        if (!errorCleared) {
+            errorMsg.style.display = 'none';
+            if (rateLimitMsg.style.display === 'block' && urlParams.get('error') !== 'rate_limit') {
+                rateLimitMsg.style.display = 'none';
+            }
+            errorCleared = true;
+        }
+    }
+
+    usernameInput.addEventListener('input', clearMessagesOnInput);
+    passwordInput.addEventListener('input', clearMessagesOnInput);
+    
+    if (usernameInput && !urlParams.has('error')) {
+        usernameInput.focus();
+    }
+})();
+</script>
+
+</body>
+</html>
