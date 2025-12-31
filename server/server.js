@@ -7,7 +7,7 @@ const morgan = require('morgan');
 const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // --- Middlewares ---
 app.use(morgan('dev'));
@@ -85,12 +85,12 @@ app.post('/login', (req, res) => {
     // Demo Credentials: admin / password
     if (username === 'admin' && password === 'password') {
         req.session.user = { username: 'admin', role: 'admin' };
-        
+
         // Return JSON success or Redirect? 
         // original WFO login was form submit, let's keep it handled via form or JS.
         // If JS handles it:
         // res.json({ success: true, redirect: '/' });
-        
+
         // If standardized form submit:
         res.redirect('/');
     } else {
@@ -119,10 +119,10 @@ app.get('/api/user', (req, res) => {
 
 // Placeholder for future Fitness API
 app.get('/api/stats', (req, res) => {
-    res.json({ 
-        workouts: 12, 
+    res.json({
+        workouts: 12,
         caloriesBurned: 5400,
-        streak: 5 
+        streak: 5
     });
 });
 
