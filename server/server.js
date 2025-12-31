@@ -23,7 +23,7 @@ app.use(session({
     saveUninitialized: false,
     cookie: {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production', // true for HTTPS
+        secure: false, // Set to false to allow session cookies over HTTP/SSH tunnel
         maxAge: 24 * 60 * 60 * 1000 // 24 hours
     }
 }));
