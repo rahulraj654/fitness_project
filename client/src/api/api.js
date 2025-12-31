@@ -1,6 +1,14 @@
 // Titan Gainz API Service
 const BASE_URL = '/api';
 
+// Helper to get CSRF token from cookies
+const getCsrfToken = () => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; XSRF-TOKEN=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+};
+
 // Mock Initial State
 const mockData = {
     user: {
@@ -35,6 +43,14 @@ const mockData = {
 export const getUserData = async () => {
     try {
         const response = await fetch(`${BASE_URL}/data`);
+
+        // Detect if we were redirected to login page (Auth failure)
+        // Browsers follow redirects on fetch, so the URL will change to /login.html
+        if (response.url && response.url.includes('login.html')) {
+            window.location.href = '/login.html';
+            return null;
+        }
+
         if (!response.ok) throw new Error('Network response was not ok');
         return await response.json();
     } catch (error) {
@@ -47,13 +63,23 @@ export const updateNutrition = async (calories, protein) => {
     try {
         const response = await fetch(`${BASE_URL}/update-nutrition`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'X-XSRF-Token': getCsrfToken()
+            },
             body: JSON.stringify({ calories, protein, date: new Date().toISOString().split('T')[0] })
         });
+
+        if (response.status === 401 || (response.url && response.url.includes('login.html'))) {
+            window.location.href = '/login.html';
+            return null;
+        }
+
+        if (!response.ok) throw new Error('Update failed');
         return await response.json();
     } catch (error) {
-        console.warn("Mock nutrition update successful");
-        return { success: true };
+        console.error("Nutrition update failed:", error);
+        return { success: false, error: error.message };
     }
 };
 
@@ -61,12 +87,22 @@ export const logWorkout = async (exercise, reps, weight) => {
     try {
         const response = await fetch(`${BASE_URL}/log-workout`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'X-XSRF-Token': getCsrfToken()
+            },
             body: JSON.stringify({ exercise, reps, weight, date: new Date().toISOString().split('T')[0] })
         });
+
+        if (response.status === 401 || (response.url && response.url.includes('login.html'))) {
+            window.location.href = '/login.html';
+            return null;
+        }
+
+        if (!response.ok) throw new Error('Log failed');
         return await response.json();
     } catch (error) {
-        console.warn(`Mock workout log for ${exercise} successful: ${reps} reps`);
-        return { success: true };
+        console.error("Workout log failed:", error);
+        return { success: false, error: error.message };
     }
 };

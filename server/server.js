@@ -33,9 +33,6 @@ app.use(session({
 // CSRF Protection
 const csrfProtection = csrf({ cookie: true });
 
-// Serve Static Files (Public)
-app.use(express.static(path.join(__dirname, '../public')));
-
 // --- Auth Middleware ---
 const requireAuth = (req, res, next) => {
     if (req.session && req.session.user) {
@@ -68,6 +65,9 @@ app.get('/', (req, res, next) => {
     }
     next();
 });
+
+// Serve Static Files (Public)
+app.use(express.static(path.join(__dirname, '../public')));
 
 // GET /api/csrf-token - To get token for frontend (if needed mainly for SPA, but here we bake it into forms usually or fetch it)
 // We will set cookie 'XSRF-TOKEN' which script.js reads. 
