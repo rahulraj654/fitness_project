@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { getUserData, updateNutrition, logWorkout } from './api/api';
+import { getUserData, updateNutrition, logWorkout, updateUser } from './api/api';
 import Dashboard from './components/Dashboard';
+import SettingsModal from './components/SettingsModal';
 import { Settings } from 'lucide-react';
 
 const App = () => {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [showSettings, setShowSettings] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -58,6 +60,17 @@ const App = () => {
         await logWorkout(exercise, reps, weight);
     };
 
+    const handleUpdateUser = async (userData) => {
+        if (!data) return;
+
+        // Optimistic Update
+        const newData = { ...data };
+        newData.user = { ...newData.user, ...userData };
+        setData(newData);
+
+        await updateUser(userData);
+    };
+
     if (loading) return (
         <div className="min-h-screen flex items-center justify-center bg-dark-bg text-neon-green font-black italic tracking-widest text-2xl">
             <div className="animate-pulse">LOADING TITAN...</div>
@@ -81,7 +94,10 @@ const App = () => {
                 <h1 className="text-2xl font-black italic tracking-tighter">
                     TITAN <span className="text-neon-green">GAINZ</span>
                 </h1>
-                <button className="p-2 text-gray-500 hover:text-white transition-colors">
+                <button
+                    onClick={() => setShowSettings(true)}
+                    className="p-2 text-gray-500 hover:text-white transition-colors"
+                >
                     <Settings size={20} />
                 </button>
             </nav>
@@ -96,6 +112,14 @@ const App = () => {
                     onLogWorkout={handleLogWorkout}
                 />
             </main>
+
+            {/* Settings Modal */}
+            <SettingsModal
+                user={data.user}
+                isOpen={showSettings}
+                onClose={() => setShowSettings(false)}
+                onSave={handleUpdateUser}
+            />
         </div>
     );
 };
