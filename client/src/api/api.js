@@ -61,6 +61,30 @@ export const getUserData = async () => {
     }
 };
 
+export const updateFoodLog = async (foodLog) => {
+    try {
+        const response = await fetch(`${BASE_URL}/update-food-log`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-XSRF-Token': getCsrfToken()
+            },
+            body: JSON.stringify({ foodLog, date: new Date().toISOString().split('T')[0] })
+        });
+
+        if (response.status === 401 || (response.url && response.url.includes('login.html'))) {
+            window.location.href = '/login.html';
+            return null;
+        }
+
+        if (!response.ok) throw new Error('Update failed');
+        return await response.json();
+    } catch (error) {
+        console.error("Food log update failed:", error);
+        return { success: false, error: error.message };
+    }
+};
+
 export const updateNutrition = async (calories, protein) => {
     try {
         const response = await fetch(`${BASE_URL}/update-nutrition`, {

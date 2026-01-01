@@ -143,6 +143,13 @@ const readData = () => {
             };
             saveData(parsed);
         }
+
+        // Migration: Add foodLog to existing dailyLogs if missing
+        parsed.dailyLogs = (parsed.dailyLogs || []).map(log => ({
+            ...log,
+            foodLog: log.foodLog || ""
+        }));
+
         return parsed;
     } catch (err) {
         console.error('Error reading data:', err);
@@ -166,13 +173,29 @@ app.get('/api/data', (req, res) => {
     res.json(data);
 });
 
+app.post('/api/update-food-log', (req, res) => {
+    const { foodLog, date } = req.body;
+    const data = readData();
+
+    let log = data.dailyLogs.find(l => l.date === date);
+    if (!log) {
+        log = { date, calories: 0, protein: 0, foodLog: "", workoutCompleted: false };
+        data.dailyLogs.push(log);
+    }
+
+    log.foodLog = foodLog;
+
+    saveData(data);
+    res.json({ success: true, log });
+});
+
 app.post('/api/update-nutrition', (req, res) => {
     const { calories, protein, date } = req.body;
     const data = readData();
 
     let log = data.dailyLogs.find(l => l.date === date);
     if (!log) {
-        log = { date, calories: 0, protein: 0, workoutCompleted: false };
+        log = { date, calories: 0, protein: 0, foodLog: "", workoutCompleted: false };
         data.dailyLogs.push(log);
     }
 

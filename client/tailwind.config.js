@@ -8,8 +8,8 @@ export default {
         extend: {
             colors: {
                 'neon-green': '#39FF14',
-                'dark-bg': '#121212',
-                'dark-card': '#1E1E1E',
+                'slate-950': '#020617',
+                'slate-50': '#F8FAFC',
             },
         },
     },

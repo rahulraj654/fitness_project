@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getUserData, updateNutrition, logWorkout, updateUser } from './api/api';
+import { getUserData, updateFoodLog, logWorkout, updateUser } from './api/api';
 import Dashboard from './components/Dashboard';
 import SettingsModal from './components/SettingsModal';
 import { Settings } from 'lucide-react';
@@ -20,37 +20,34 @@ const App = () => {
         fetchData();
     }, []);
 
-    const handleUpdateNutrition = async (calDiff, protDiff) => {
+    const handleUpdateFoodLog = async (foodLog, date) => {
         if (!data) return;
 
         // Optimistic Update
-        const today = new Date().toISOString().split('T')[0];
         const newData = { ...data };
-        let todayLog = newData.dailyLogs.find(log => log.date === today);
+        let todayLog = newData.dailyLogs.find(log => log.date === date);
 
         if (!todayLog) {
-            todayLog = { date: today, calories: 0, protein: 0, workoutCompleted: false };
+            todayLog = { date: date, calories: 0, protein: 0, foodLog: "", workoutCompleted: false };
             newData.dailyLogs.push(todayLog);
         }
 
-        todayLog.calories += calDiff;
-        todayLog.protein += protDiff;
+        todayLog.foodLog = foodLog;
         setData(newData);
 
-        await updateNutrition(todayLog.calories, todayLog.protein);
+        await updateFoodLog(foodLog);
     };
 
-    const handleLogWorkout = async (exercise, reps, weight) => {
+    const handleLogWorkout = async (exercise, reps, weight, date) => {
         if (!data) return;
 
         // Optimistic Update
         const newData = { ...data };
         newData.workoutHistory[exercise] = { lastReps: reps, lastWeight: weight };
 
-        const today = new Date().toISOString().split('T')[0];
-        let todayLog = newData.dailyLogs.find(log => log.date === today);
+        let todayLog = newData.dailyLogs.find(log => log.date === date);
         if (!todayLog) {
-            todayLog = { date: today, calories: 0, protein: 0, workoutCompleted: true };
+            todayLog = { date: date, calories: 0, protein: 0, foodLog: "", workoutCompleted: true };
             newData.dailyLogs.push(todayLog);
         } else {
             todayLog.workoutCompleted = true;
@@ -72,31 +69,31 @@ const App = () => {
     };
 
     if (loading) return (
-        <div className="min-h-screen flex items-center justify-center bg-dark-bg text-neon-green font-black italic tracking-widest text-2xl">
-            <div className="animate-pulse">LOADING TITAN...</div>
+        <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-950 font-black italic tracking-widest text-2xl uppercase">
+            <div className="animate-pulse">Loading Titan...</div>
         </div>
     );
 
     if (!data) return (
-        <div className="min-h-screen flex items-center justify-center bg-dark-bg text-white px-6 text-center">
-            <div className="glass-card p-8">
-                <h2 className="text-2xl font-black italic text-neon-green mb-4">CONNECTION LOST</h2>
-                <p className="text-gray-400 mb-6">Unable to sync with Titan server. Please check your network.</p>
+        <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-900 px-6 text-center">
+            <div className="glass-card p-8 border-slate-200">
+                <h2 className="text-2xl font-black italic text-slate-900 mb-4 uppercase">Sync Failure</h2>
+                <p className="text-slate-500 mb-6">Unable to connect to Titan server. Please check your network.</p>
                 <button onClick={() => window.location.reload()} className="btn-primary w-full">RETRY SYNC</button>
             </div>
         </div>
     );
 
     return (
-        <div className="min-h-screen bg-dark-bg text-white">
+        <div className="min-h-screen bg-slate-50 text-slate-900">
             {/* Navbar Minimal */}
-            <nav className="p-6 pb-2 max-w-2xl mx-auto flex justify-between items-center bg-dark-bg sticky top-0 z-50">
-                <h1 className="text-2xl font-black italic tracking-tighter">
-                    TITAN <span className="text-neon-green">GAINZ</span>
+            <nav className="p-6 pb-2 max-w-2xl mx-auto flex justify-between items-center bg-slate-50 sticky top-0 z-50">
+                <h1 className="text-2xl font-black italic tracking-tighter text-slate-950">
+                    TITAN <span className="text-neon-green neon-text-glow">GAINZ</span>
                 </h1>
                 <button
                     onClick={() => setShowSettings(true)}
-                    className="p-2 text-gray-500 hover:text-white transition-colors"
+                    className="p-2 text-slate-400 hover:text-slate-900 transition-colors"
                 >
                     <Settings size={20} />
                 </button>
@@ -107,8 +104,8 @@ const App = () => {
                 <Dashboard
                     user={data.user}
                     workoutHistory={data.workoutHistory}
-                    todayStats={data.dailyLogs.find(l => l.date === new Date().toISOString().split('T')[0]) || { calories: 0, protein: 0 }}
-                    onUpdateNutrition={handleUpdateNutrition}
+                    dailyLogs={data.dailyLogs}
+                    onUpdateFoodLog={handleUpdateFoodLog}
                     onLogWorkout={handleLogWorkout}
                 />
             </main>
