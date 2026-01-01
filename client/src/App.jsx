@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getUserData, updateFoodLog, logWorkout, updateUser } from './api/api';
+import { getUserData, updateFoodLog, logWorkout, updateUser, logout } from './api/api';
 import Dashboard from './components/Dashboard';
 import SettingsModal from './components/SettingsModal';
 import { Settings } from 'lucide-react';
@@ -28,14 +28,14 @@ const App = () => {
         let todayLog = newData.dailyLogs.find(log => log.date === date);
 
         if (!todayLog) {
-            todayLog = { date: date, calories: 0, protein: 0, foodLog: "", workoutCompleted: false };
+            todayLog = { date: date, foodLog: "", workoutCompleted: false };
             newData.dailyLogs.push(todayLog);
         }
 
         todayLog.foodLog = foodLog;
         setData(newData);
 
-        await updateFoodLog(foodLog);
+        await updateFoodLog(foodLog, date);
     };
 
     const handleLogWorkout = async (exercise, reps, weight, date) => {
@@ -47,14 +47,18 @@ const App = () => {
 
         let todayLog = newData.dailyLogs.find(log => log.date === date);
         if (!todayLog) {
-            todayLog = { date: date, calories: 0, protein: 0, foodLog: "", workoutCompleted: true };
+            todayLog = { date: date, foodLog: "", workoutCompleted: true };
             newData.dailyLogs.push(todayLog);
         } else {
             todayLog.workoutCompleted = true;
         }
 
         setData(newData);
-        await logWorkout(exercise, reps, weight);
+        await logWorkout(exercise, reps, weight, date);
+    };
+
+    const handleLogout = async () => {
+        await logout();
     };
 
     const handleUpdateUser = async (userData) => {
@@ -86,27 +90,16 @@ const App = () => {
 
     return (
         <div className="min-h-screen bg-slate-50 text-slate-900">
-            {/* Navbar Minimal */}
-            <nav className="p-6 pb-2 max-w-2xl mx-auto flex justify-between items-center bg-slate-50 sticky top-0 z-50">
-                <h1 className="text-2xl font-black italic tracking-tighter text-slate-950">
-                    TITAN <span className="text-neon-green neon-text-glow">GAINZ</span>
-                </h1>
-                <button
-                    onClick={() => setShowSettings(true)}
-                    className="p-2 text-slate-400 hover:text-slate-900 transition-colors"
-                >
-                    <Settings size={20} />
-                </button>
-            </nav>
-
             {/* Unified Dashboard */}
-            <main className="max-w-2xl mx-auto px-6">
+            <main className="max-w-5xl mx-auto px-6 pt-8">
                 <Dashboard
                     user={data.user}
                     workoutHistory={data.workoutHistory}
                     dailyLogs={data.dailyLogs}
                     onUpdateFoodLog={handleUpdateFoodLog}
                     onLogWorkout={handleLogWorkout}
+                    onLogout={handleLogout}
+                    onOpenSettings={() => setShowSettings(true)}
                 />
             </main>
 

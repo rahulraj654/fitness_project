@@ -9,7 +9,9 @@ import {
     Award,
     Info,
     X,
-    MessageSquare
+    MessageSquare,
+    LogOut,
+    Settings
 } from 'lucide-react';
 
 const EXERCISE_GUIDE = {
@@ -71,7 +73,7 @@ const fullMonthNames = [
     "July", "August", "September", "October", "November", "December"
 ];
 
-const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWorkout }) => {
+const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWorkout, onLogout, onOpenSettings }) => {
     const todayStr = new Date().toISOString().split('T')[0];
     const [selectedDate, setSelectedDate] = useState(todayStr);
 
@@ -88,7 +90,6 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
     const isSelectedToday = selectedDate === todayStr;
 
     // Week calculation for highlighting
-    // We want to highlight the week containing the selected date
     const startOfWeek = new Date(selDateObj);
     startOfWeek.setDate(selDateObj.getDate() - selDateObj.getDay());
     const endOfWeek = new Date(startOfWeek);
@@ -154,31 +155,39 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
     }
 
     return (
-        <div className="flex flex-col lg:grid lg:grid-cols-[280px_1fr] gap-8 min-h-[calc(100vh-140px)] animate-in fade-in duration-500 pb-32">
-            {/* Sidebar: Calendar */}
-            <aside className="space-y-6">
-                <div className="lg:sticky lg:top-8">
-                    <div className="glass-card p-3 border-slate-200 shadow-sm overflow-hidden bg-white/80">
+        <div className="flex flex-col lg:grid lg:grid-cols-[240px_1fr] gap-10 min-h-screen animate-in fade-in duration-500 pb-32">
+            {/* Sidebar: Navigation & Controls */}
+            <aside className="lg:border-r lg:border-slate-100 lg:pr-8">
+                <div className="lg:sticky lg:top-8 flex flex-col h-full min-h-[calc(100vh-80px)]">
+                    {/* Brand */}
+                    <div className="mb-10 pt-2 text-center lg:text-left">
+                        <h1 className="text-3xl font-black italic tracking-tighter text-slate-950 uppercase leading-none">
+                            TITAN <span className="text-neon-green">GAINZ</span>
+                        </h1>
+                        <p className="text-[10px] font-black tracking-[0.3em] text-slate-300 mt-2 uppercase">Evolution Engine</p>
+                    </div>
+
+                    {/* Compact Calendar */}
+                    <div className="glass-card mb-8 p-3 bg-white/50 border-slate-100 shadow-sm overflow-hidden">
                         <div className="flex justify-between items-center mb-3">
                             <h3 className="text-[10px] font-black uppercase tracking-wider text-slate-900 flex items-center gap-2">
                                 <Calendar size={12} className="text-neon-green" />
-                                {fullMonthNames[viewMonth]} <span className="text-slate-400 font-bold">{viewYear}</span>
+                                {fullMonthNames[viewMonth]}
                             </h3>
                             <div className="flex gap-0.5">
-                                <button onClick={handlePrevMonth} className="p-1 hover:bg-slate-100 rounded-md text-slate-400 hover:text-slate-900 transition-colors">
+                                <button onClick={handlePrevMonth} className="p-1 hover:bg-slate-100 rounded-md text-slate-400">
                                     <ChevronLeft size={12} />
                                 </button>
-                                <button onClick={handleNextMonth} className="p-1 hover:bg-slate-100 rounded-md text-slate-400 hover:text-slate-900 transition-colors">
+                                <button onClick={handleNextMonth} className="p-1 hover:bg-slate-100 rounded-md text-slate-400">
                                     <ChevronRight size={12} />
                                 </button>
                             </div>
                         </div>
 
-                        {/* Calendar Sheet Grid */}
                         <div className="grid grid-cols-7 gap-px bg-slate-100 border border-slate-100 rounded-lg overflow-hidden">
                             {dayNames.map(d => (
-                                <div key={d} className="bg-white text-[8px] font-black uppercase text-slate-400 text-center py-2 border-b border-slate-50">
-                                    {d}
+                                <div key={d} className="bg-white text-[8px] font-black uppercase text-slate-300 text-center py-2">
+                                    {d[0]}
                                 </div>
                             ))}
                             {calendarDays.map((dateStr, idx) => {
@@ -198,21 +207,18 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
                                         className={`
                                             aspect-square flex flex-col items-center justify-center transition-all relative text-[9px] font-bold
                                             ${isSelected
-                                                ? 'bg-slate-950 text-white z-10 shadow-inner'
+                                                ? 'bg-slate-950 text-white z-10'
                                                 : isToday
-                                                    ? 'bg-neon-green/30 text-slate-950 font-black'
+                                                    ? 'bg-neon-green text-slate-950 font-black'
                                                     : isHighlightedWeek
-                                                        ? 'bg-neon-green/5 text-slate-900'
+                                                        ? 'bg-neon-green/10 text-slate-900'
                                                         : 'bg-white text-slate-400 hover:bg-slate-50'
                                             }
                                         `}
                                     >
                                         <span>{parseInt(d)}</span>
                                         {hasWorkout && (
-                                            <div className={`w-1 h-1 rounded-full mt-0.5 ${isSelected ? 'bg-neon-green' : 'bg-neon-green/60'}`} />
-                                        )}
-                                        {isHighlightedWeek && !isSelected && (
-                                            <div className="absolute inset-0 border-y border-neon-green/10 pointer-events-none" />
+                                            <div className={`w-0.5 h-0.5 rounded-full mt-0.5 ${isSelected ? 'bg-neon-green' : 'bg-neon-green/60'}`} />
                                         )}
                                     </button>
                                 );
@@ -220,97 +226,114 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
                         </div>
                     </div>
 
-                    {/* Quick Stats in Sidebar */}
-                    <div className="mt-4 px-1 flex flex-col gap-2">
-                        <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-400">
-                            <span>Training Streak</span>
-                            <span className="text-slate-900">{user.streak} Days</span>
-                        </div>
-                        <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                            <div className="bg-neon-green h-full" style={{ width: `${Math.min(100, (user.streak / 30) * 100)}%` }}></div>
-                        </div>
+                    {/* Navigation Buttons */}
+                    <div className="flex flex-col gap-2 flex-grow">
+                        <button
+                            onClick={onOpenSettings}
+                            className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-50 text-slate-500 hover:text-slate-950 transition-all group"
+                        >
+                            <Settings size={18} className="group-hover:rotate-45 transition-transform duration-500" />
+                            <span className="text-xs font-black uppercase tracking-widest">Settings</span>
+                        </button>
+
+                        <button
+                            onClick={onLogout}
+                            className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-50 text-slate-500 hover:text-red-600 transition-all mt-auto mb-10"
+                        >
+                            <LogOut size={18} />
+                            <span className="text-xs font-black uppercase tracking-widest">System Exit</span>
+                        </button>
                     </div>
                 </div>
             </aside>
 
             {/* Main Content Area */}
-            <main>
+            <main className="max-w-4xl">
                 {/* Header Info */}
-                <header className="mb-8">
-                    <div className={`text-[10px] font-black uppercase tracking-[0.2em] mb-2 ${isSelectedToday ? 'text-slate-400' : 'text-neon-green'}`}>
-                        {isSelectedToday ? 'TRACKING TODAY' : 'VIEWING DATE'} — {selDateObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                <header className="mb-12 border-b border-slate-100 pb-8">
+                    <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 rounded-full bg-slate-950 flex items-center justify-center text-white font-black italic text-lg shadow-lg">
+                            {user.streak}
+                        </div>
+                        <div>
+                            <div className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-0.5">Global Streak Score</div>
+                            <div className="text-xs font-black text-slate-950 uppercase tracking-widest">Active Phase: Persistence</div>
+                        </div>
                     </div>
-                    <h2 className="text-4xl font-black text-slate-950 italic tracking-tighter uppercase leading-none">
-                        {isRestDay ? "Active Recovery" : routine.name}
+                    <div className={`text-xs font-black uppercase tracking-[0.2em] mb-3 ${isSelectedToday ? 'text-slate-400' : 'text-neon-green'}`}>
+                        {isSelectedToday ? 'SESSION: TODAY' : `SESSION: ${selDateObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`}
+                    </div>
+                    <h2 className="text-6xl font-black text-slate-950 italic tracking-tighter uppercase leading-none">
+                        {isRestDay ? "Internal Reset" : routine.name}
                     </h2>
                 </header>
 
-                <div className="grid grid-cols-1 xl:grid-cols-[1fr_350px] gap-8">
+                <div className="grid grid-cols-1 xl:grid-cols-[1fr_380px] gap-12 items-start">
                     {/* Left Col: Exercises */}
-                    <div className="space-y-6">
+                    <div className="space-y-8">
                         <section>
-                            <div className="flex items-center gap-2 mb-4">
-                                <Dumbbell size={16} className="text-slate-400" />
-                                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Training Session</h3>
+                            <div className="flex items-center gap-3 mb-6">
+                                <Dumbbell size={20} className="text-slate-950" />
+                                <h3 className="text-sm font-black uppercase tracking-[0.3em] text-slate-950">Structural Loading</h3>
                             </div>
 
                             {isRestDay ? (
-                                <div className="glass-card p-12 border-slate-200 text-center bg-slate-50/50">
-                                    <Award size={40} className="mx-auto text-slate-200 mb-4" />
-                                    <h4 className="text-lg font-black text-slate-400 italic mb-2 uppercase tracking-tighter">Growth happens in rest</h4>
-                                    <p className="text-slate-400 text-xs italic">Focus on mobility, hydration, and quality sleep today.</p>
+                                <div className="glass-card p-20 border-slate-200 text-center bg-slate-50/30">
+                                    <Award size={48} className="mx-auto text-slate-200 mb-6" />
+                                    <h4 className="text-2xl font-black text-slate-400 italic mb-3 uppercase tracking-tighter">Growth happens in rest</h4>
+                                    <p className="text-slate-400 text-sm italic font-medium">Focus on total recovery, cellular repair, and mental clarity today.</p>
                                 </div>
                             ) : (
-                                <div className="space-y-4">
+                                <div className="space-y-6">
                                     {routine.exercises.map((ex) => {
                                         const history = workoutHistory[ex.name] || { lastReps: 0, lastWeight: 0 };
                                         const guideText = EXERCISE_GUIDE[ex.name];
 
                                         return (
-                                            <div key={ex.id} className="glass-card border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
-                                                <div className="p-6">
-                                                    <div className="flex justify-between items-start mb-5">
+                                            <div key={ex.id} className="glass-card border-slate-200 overflow-hidden shadow-sm hover:shadow-xl hover:translate-x-1 transition-all duration-300 bg-white/80">
+                                                <div className="p-8">
+                                                    <div className="flex justify-between items-center mb-6">
                                                         <div>
-                                                            <h3 className="text-xl font-black italic text-slate-950 uppercase tracking-tight">{ex.name}</h3>
-                                                            <div className="flex items-center gap-3 mt-1">
-                                                                <span className="text-neon-green text-[10px] font-black uppercase tracking-widest">{ex.target}</span>
-                                                                <span className="w-1 h-1 bg-slate-200 rounded-full"></span>
-                                                                <span className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">{ex.type}</span>
+                                                            <h3 className="text-2xl font-black italic text-slate-950 uppercase tracking-tight">{ex.name}</h3>
+                                                            <div className="flex items-center gap-4 mt-2">
+                                                                <span className="text-neon-green text-[11px] font-black uppercase tracking-[0.2em] bg-neon-green/10 px-2 py-0.5 rounded">{ex.target}</span>
+                                                                <span className="text-slate-400 text-xs font-black uppercase tracking-widest">{ex.type} LOAD</span>
                                                             </div>
                                                         </div>
-                                                        <div className="bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 text-[10px] font-black uppercase flex items-center gap-2">
-                                                            <History size={12} className="text-slate-400" />
-                                                            <span className="text-slate-500">PB:</span>
-                                                            <span className="text-slate-950 font-black">{history.lastReps} {history.lastWeight > 0 ? `@ ${history.lastWeight}kg` : 'REPS'}</span>
+                                                        <div className="bg-slate-50 px-4 py-2.5 rounded-2xl border border-slate-100 flex items-center gap-3">
+                                                            <History size={16} className="text-slate-300" />
+                                                            <div className="text-right">
+                                                                <div className="text-[10px] font-black text-slate-400 uppercase leading-none mb-1">Previous Best</div>
+                                                                <div className="text-sm font-black text-slate-950">{history.lastReps} <span className="text-slate-400 text-[10px]">REPS</span> {history.lastWeight > 0 ? `@ ${history.lastWeight}kg` : ''}</div>
+                                                            </div>
                                                         </div>
                                                     </div>
 
                                                     {guideText && (
-                                                        <div className="mb-6 p-4 bg-slate-50/80 border-l-4 border-neon-green/30 rounded-r-xl">
+                                                        <div className="mb-8 p-5 bg-slate-50/50 border-l-8 border-slate-900 rounded-r-2xl">
                                                             <div className="flex items-center gap-2 mb-2">
                                                                 <Info size={14} className="text-slate-400" />
-                                                                <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">Technique Guide</span>
+                                                                <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">Titan Optimization</span>
                                                             </div>
-                                                            <p className="text-slate-600 text-[11px] leading-relaxed italic font-medium">{guideText}</p>
+                                                            <p className="text-slate-700 text-sm leading-relaxed italic font-bold">{guideText}</p>
                                                         </div>
                                                     )}
 
-                                                    <div className="flex gap-3">
+                                                    <div className="flex gap-4">
                                                         <div className="flex-1 relative">
                                                             <input
                                                                 type="number"
                                                                 placeholder="REPS PERFORMED"
                                                                 value={inputs[ex.id] || ''}
                                                                 onChange={(e) => handleInputChange(ex.id, e.target.value)}
-                                                                className="w-full bg-slate-50 border border-slate-100 rounded-xl py-4 px-5 text-slate-950 font-black text-sm focus:outline-none focus:ring-2 focus:ring-neon-green/20 focus:border-neon-green transition-all"
+                                                                className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-5 px-6 text-slate-950 font-black text-lg focus:outline-none focus:ring-4 focus:ring-neon-green/10 focus:border-neon-green transition-all"
                                                             />
-                                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[9px] font-black text-slate-300 uppercase">Input</span>
                                                         </div>
                                                         <button
                                                             onClick={() => handleLog(ex)}
-                                                            className="aspect-square bg-slate-950 text-white flex items-center justify-center rounded-xl hover:bg-neon-green hover:text-black transition-all px-5 shadow-lg active:scale-95"
+                                                            className="aspect-square bg-slate-950 text-white flex items-center justify-center rounded-2xl hover:bg-neon-green hover:text-black transition-all px-6 shadow-xl active:scale-95 group"
                                                         >
-                                                            <CheckCircle2 size={24} strokeWidth={2.5} />
+                                                            <CheckCircle2 size={32} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
                                                         </button>
                                                     </div>
                                                 </div>
@@ -322,32 +345,38 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
                         </section>
                     </div>
 
-                    {/* Right Col: Food Log */}
-                    <div className="space-y-6">
-                        <section className="lg:sticky lg:top-8">
-                            <div className="flex items-center gap-2 mb-4">
-                                <MessageSquare size={16} className="text-slate-400" />
-                                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Fuel Log</h3>
+                    {/* Right Col: Food Log (Floating Down) */}
+                    <div className="xl:sticky xl:top-8 flex flex-col gap-10">
+                        <section>
+                            <div className="flex items-center gap-3 mb-6">
+                                <MessageSquare size={20} className="text-slate-950" />
+                                <h3 className="text-sm font-black uppercase tracking-[0.3em] text-slate-950">Metabolic Fuel</h3>
                             </div>
-                            <div className="glass-card p-6 border-slate-200">
+                            <div className="glass-card p-8 border-slate-200 bg-white/60 shadow-lg">
+                                <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 block">Bio-Data Intake Log</div>
                                 <textarea
-                                    placeholder="Enter meals, macros, or notes for this date..."
+                                    placeholder="Enter meals, nutrients, or system notes..."
                                     value={foodLogInput}
                                     onChange={(e) => setFoodLogInput(e.target.value)}
-                                    className="w-full bg-slate-50 border border-slate-100 rounded-2xl p-5 text-slate-950 text-sm focus:outline-none focus:ring-2 focus:ring-neon-green/10 focus:border-neon-green transition-all min-h-[200px] xl:min-h-[400px] resize-none mb-4 leading-relaxed font-medium"
+                                    className="w-full bg-slate-50/50 border-2 border-slate-100 rounded-3xl p-6 text-slate-950 text-base focus:outline-none focus:ring-4 focus:ring-neon-green/5 focus:border-neon-green transition-all min-h-[300px] resize-none mb-6 leading-relaxed font-bold placeholder:italic"
                                 />
                                 <button
                                     onClick={handleSaveFoodLog}
                                     disabled={isSavingFoodLog}
-                                    className={`w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] transition-all shadow-sm ${isSavingFoodLog
-                                        ? 'bg-slate-50 text-slate-300'
-                                        : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-950 hover:text-white hover:border-slate-950'
+                                    className={`w-full py-5 rounded-2xl font-black text-xs uppercase tracking-[0.4em] transition-all shadow-xl active:scale-[0.98] ${isSavingFoodLog
+                                        ? 'bg-slate-100 text-slate-300'
+                                        : 'bg-slate-950 text-white hover:bg-neon-green hover:text-slate-950'
                                         }`}
                                 >
                                     {isSavingFoodLog ? 'Syncing...' : 'Log Nutrition'}
                                 </button>
                             </div>
                         </section>
+
+                        {/* Motivational Quote or Status */}
+                        <div className="px-6 italic text-slate-400 text-sm font-medium leading-relaxed border-l-4 border-slate-100">
+                            "Discipline is the engine that converts intent into outcomes. The Titan does not bargain with fatigue."
+                        </div>
                     </div>
                 </div>
             </main>

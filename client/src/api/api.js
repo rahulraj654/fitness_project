@@ -46,8 +46,6 @@ export const getUserData = async () => {
     try {
         const response = await fetch(`${BASE_URL}/data`);
 
-        // Detect if we were redirected to login page (Auth failure)
-        // Browsers follow redirects on fetch, so the URL will change to /login.html
         if (response.url && response.url.includes('login.html')) {
             window.location.href = '/login.html';
             return null;
@@ -61,15 +59,32 @@ export const getUserData = async () => {
     }
 };
 
-export const updateFoodLog = async (foodLog) => {
+export const logout = async () => {
     try {
+        const response = await fetch('/logout', {
+            method: 'POST',
+            headers: {
+                'X-XSRF-Token': getCsrfToken()
+            }
+        });
+        window.location.href = '/login.html';
+        return await response.json();
+    } catch (error) {
+        console.error("Logout failed:", error);
+        window.location.href = '/login.html';
+    }
+};
+
+export const updateFoodLog = async (foodLog, date) => {
+    try {
+        const logDate = date || new Date().toISOString().split('T')[0];
         const response = await fetch(`${BASE_URL}/update-food-log`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-XSRF-Token': getCsrfToken()
             },
-            body: JSON.stringify({ foodLog, date: new Date().toISOString().split('T')[0] })
+            body: JSON.stringify({ foodLog, date: logDate })
         });
 
         if (response.status === 401 || (response.url && response.url.includes('login.html'))) {
@@ -85,15 +100,16 @@ export const updateFoodLog = async (foodLog) => {
     }
 };
 
-export const updateNutrition = async (calories, protein) => {
+export const updateNutrition = async (calories, protein, date) => {
     try {
+        const logDate = date || new Date().toISOString().split('T')[0];
         const response = await fetch(`${BASE_URL}/update-nutrition`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-XSRF-Token': getCsrfToken()
             },
-            body: JSON.stringify({ calories, protein, date: new Date().toISOString().split('T')[0] })
+            body: JSON.stringify({ calories, protein, date: logDate })
         });
 
         if (response.status === 401 || (response.url && response.url.includes('login.html'))) {
@@ -109,15 +125,16 @@ export const updateNutrition = async (calories, protein) => {
     }
 };
 
-export const logWorkout = async (exercise, reps, weight) => {
+export const logWorkout = async (exercise, reps, weight, date) => {
     try {
+        const logDate = date || new Date().toISOString().split('T')[0];
         const response = await fetch(`${BASE_URL}/log-workout`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-XSRF-Token': getCsrfToken()
             },
-            body: JSON.stringify({ exercise, reps, weight, date: new Date().toISOString().split('T')[0] })
+            body: JSON.stringify({ exercise, reps, weight, date: logDate })
         });
 
         if (response.status === 401 || (response.url && response.url.includes('login.html'))) {
@@ -153,7 +170,6 @@ export const updateUser = async (userData) => {
         return await response.json();
     } catch (error) {
         console.warn("User update failed (using mock):", error);
-        // Mock success - return success with the updated data
         return { success: true, user: userData };
     }
 };
