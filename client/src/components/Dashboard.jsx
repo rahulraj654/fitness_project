@@ -87,6 +87,19 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
     const isRestDay = !routine;
     const isSelectedToday = selectedDate === todayStr;
 
+    // Week calculation for highlighting
+    // We want to highlight the week containing the selected date
+    const startOfWeek = new Date(selDateObj);
+    startOfWeek.setDate(selDateObj.getDate() - selDateObj.getDay());
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+    const isInSelectedWeek = (dateStr) => {
+        if (!dateStr) return false;
+        const d = new Date(dateStr);
+        return d >= startOfWeek && d <= endOfWeek;
+    };
+
     // Daily log for selected date
     const selectedDayLog = dailyLogs.find(l => l.date === selectedDate) || { foodLog: "", workoutCompleted: false };
 
@@ -134,190 +147,208 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
     const firstDay = getFirstDayOfMonth(viewYear, viewMonth);
 
     const calendarDays = [];
-    // Padding for start of month
-    for (let i = 0; i < firstDay; i++) {
-        calendarDays.push(null);
-    }
-    // Days of month
+    for (let i = 0; i < firstDay; i++) calendarDays.push(null);
     for (let d = 1; d <= daysInMonth; d++) {
         const dateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
         calendarDays.push(dateStr);
     }
 
     return (
-        <div className="flex flex-col min-h-[calc(100vh-140px)] animate-in fade-in duration-500 pb-32">
-            {/* Header */}
-            <header className="mb-6">
-                <div className="flex justify-between items-start mb-2">
-                    <div>
-                        <div className={`text-[10px] font-black uppercase tracking-[0.2em] mb-1 ${isSelectedToday ? 'text-slate-400' : 'text-neon-green'}`}>
-                            {isSelectedToday ? 'TODAY' : 'VIEWING'} — {selDateObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                        </div>
-                        <h2 className="text-3xl font-black text-slate-950 italic tracking-tighter uppercase">
-                            {isRestDay ? "Rest & Recover" : routine.name}
-                        </h2>
-                    </div>
-                    <div className="bg-white px-4 py-2 rounded-2xl border border-slate-200 shadow-sm text-xs font-bold flex items-center gap-2">
-                        <span className="w-2 h-2 bg-neon-green rounded-full"></span>
-                        <span className="text-slate-500 uppercase tracking-wider">Streak:</span>
-                        <span className="text-slate-950 font-black">{user.streak}</span>
-                    </div>
-                </div>
-            </header>
-
-            {/* Monthly Calendar View */}
-            <section className="mb-8">
-                <div className="glass-card p-5 border-slate-200 shadow-sm">
-                    <div className="flex justify-between items-center mb-6">
-                        <h3 className="text-sm font-black uppercase tracking-wider text-slate-900">
-                            {fullMonthNames[viewMonth]} <span className="text-slate-400">{viewYear}</span>
-                        </h3>
-                        <div className="flex gap-1">
-                            <button onClick={handlePrevMonth} className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-900 transition-colors">
-                                <ChevronLeft size={18} />
-                            </button>
-                            <button onClick={handleNextMonth} className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-900 transition-colors">
-                                <ChevronRight size={18} />
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="calendar-grid mb-1">
-                        {dayNames.map(d => (
-                            <div key={d} className="text-[10px] font-black uppercase text-slate-400 text-center py-2">
-                                {d}
-                            </div>
-                        ))}
-                    </div>
-                    <div className="calendar-grid">
-                        {calendarDays.map((dateStr, idx) => {
-                            if (!dateStr) return <div key={`empty-${idx}`} />;
-
-                            const isSelected = dateStr === selectedDate;
-                            const isToday = dateStr === todayStr;
-                            const d = dateStr.split('-')[2];
-                            const log = dailyLogs.find(l => l.date === dateStr);
-                            const hasWorkout = log?.workoutCompleted;
-
-                            return (
-                                <button
-                                    key={dateStr}
-                                    onClick={() => handleDateClick(dateStr)}
-                                    className={`
-                                        aspect-square flex flex-col items-center justify-center rounded-xl transition-all relative border
-                                        ${isSelected
-                                            ? 'bg-slate-950 text-white border-slate-950 shadow-lg scale-105 z-10'
-                                            : isToday
-                                                ? 'bg-neon-green/10 border-neon-green text-slate-950'
-                                                : 'bg-slate-50 border-transparent text-slate-600 hover:bg-slate-100'
-                                        }
-                                    `}
-                                >
-                                    <span className="text-xs font-black">{parseInt(d)}</span>
-                                    {hasWorkout && (
-                                        <div className={`w-1 h-1 rounded-full mt-1 ${isSelected ? 'bg-neon-green' : 'bg-neon-green'}`} />
-                                    )}
+        <div className="flex flex-col lg:grid lg:grid-cols-[280px_1fr] gap-8 min-h-[calc(100vh-140px)] animate-in fade-in duration-500 pb-32">
+            {/* Sidebar: Calendar */}
+            <aside className="space-y-6">
+                <div className="lg:sticky lg:top-8">
+                    <div className="glass-card p-4 border-slate-200 shadow-sm overflow-hidden bg-white/80">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-[11px] font-black uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                                <Calendar size={14} className="text-neon-green" />
+                                {fullMonthNames[viewMonth]} <span className="text-slate-400 font-bold">{viewYear}</span>
+                            </h3>
+                            <div className="flex gap-0.5">
+                                <button onClick={handlePrevMonth} className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-900 transition-colors">
+                                    <ChevronLeft size={14} />
                                 </button>
-                            );
-                        })}
-                    </div>
-                </div>
-            </section>
-
-            {/* Main Content Area */}
-            <div className="space-y-6">
-                {/* Food Log Section */}
-                <section>
-                    <div className="flex items-center gap-2 mb-3">
-                        <MessageSquare size={16} className="text-slate-400" />
-                        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Food Log</h3>
-                    </div>
-                    <div className="glass-card p-4 border-slate-200">
-                        <textarea
-                            placeholder="What did you eat today? (e.g. 3 eggs, chicken breast, protein shake...)"
-                            value={foodLogInput}
-                            onChange={(e) => setFoodLogInput(e.target.value)}
-                            className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-slate-950 text-sm focus:outline-none focus:border-neon-green transition-colors min-h-[100px] resize-none mb-3"
-                        />
-                        <button
-                            onClick={handleSaveFoodLog}
-                            disabled={isSavingFoodLog}
-                            className={`w-full py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all ${isSavingFoodLog ? 'bg-slate-100 text-slate-400' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                                }`}
-                        >
-                            {isSavingFoodLog ? 'Saving...' : 'Save Food Log'}
-                        </button>
-                    </div>
-                </section>
-
-                {/* Workout Section */}
-                <section>
-                    <div className="flex items-center gap-2 mb-3">
-                        <Dumbbell size={16} className="text-slate-400" />
-                        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Training</h3>
-                    </div>
-
-                    {isRestDay ? (
-                        <div className="glass-card p-8 border-slate-200 text-center">
-                            <Award size={48} className="mx-auto text-slate-200 mb-4" />
-                            <h4 className="text-lg font-black text-slate-400 italic mb-1 uppercase">Active Recovery</h4>
-                            <p className="text-slate-400 text-xs">No specific session scheduled for this day.</p>
+                                <button onClick={handleNextMonth} className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-900 transition-colors">
+                                    <ChevronRight size={14} />
+                                </button>
+                            </div>
                         </div>
-                    ) : (
-                        <div className="space-y-3">
-                            {routine.exercises.map((ex) => {
-                                const history = workoutHistory[ex.name] || { lastReps: 0, lastWeight: 0 };
-                                const guideText = EXERCISE_GUIDE[ex.name];
+
+                        <div className="calendar-grid mb-1">
+                            {dayNames.map(d => (
+                                <div key={d} className="text-[9px] font-black uppercase text-slate-400 text-center py-1.5">
+                                    {d}
+                                </div>
+                            ))}
+                        </div>
+                        <div className="calendar-grid gap-1">
+                            {calendarDays.map((dateStr, idx) => {
+                                if (!dateStr) return <div key={`empty-${idx}`} />;
+
+                                const isSelected = dateStr === selectedDate;
+                                const isToday = dateStr === todayStr;
+                                const isHighlightedWeek = isInSelectedWeek(dateStr);
+                                const d = dateStr.split('-')[2];
+                                const log = dailyLogs.find(l => l.date === dateStr);
+                                const hasWorkout = log?.workoutCompleted;
 
                                 return (
-                                    <div key={ex.id} className="glass-card border-slate-200 overflow-hidden shadow-sm">
-                                        <div className="p-5">
-                                            <div className="flex justify-between items-start mb-4">
-                                                <div>
-                                                    <h3 className="text-lg font-black italic text-slate-950 uppercase">{ex.name}</h3>
-                                                    <div className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">{ex.target}</div>
-                                                </div>
-                                                <div className="bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100 text-[9px] font-black uppercase flex items-center gap-2">
-                                                    <History size={11} className="text-slate-400" />
-                                                    <span className="text-slate-500">Last:</span>
-                                                    <span className="text-slate-950">{history.lastReps} {history.lastWeight > 0 ? `@${history.lastWeight}kg` : 'REPS'}</span>
-                                                </div>
-                                            </div>
-
-                                            {/* Prominent Exercise Guide */}
-                                            {guideText && (
-                                                <div className="mb-5 p-4 bg-slate-50 border border-slate-100 rounded-xl">
-                                                    <div className="flex items-center gap-2 mb-2">
-                                                        <Info size={14} className="text-slate-400" />
-                                                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">Form Guide</span>
-                                                    </div>
-                                                    <p className="text-slate-600 text-[11px] leading-relaxed italic">{guideText}</p>
-                                                </div>
-                                            )}
-
-                                            <div className="flex gap-2">
-                                                <input
-                                                    type="number"
-                                                    placeholder="REPS"
-                                                    value={inputs[ex.id] || ''}
-                                                    onChange={(e) => handleInputChange(ex.id, e.target.value)}
-                                                    className="flex-1 bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-slate-950 font-black text-sm focus:outline-none focus:border-neon-green transition-colors"
-                                                />
-                                                <button
-                                                    onClick={() => handleLog(ex)}
-                                                    className="aspect-square bg-neon-green text-black flex items-center justify-center rounded-xl hover:scale-105 active:scale-95 transition-all px-4 shadow-md"
-                                                >
-                                                    <CheckCircle2 size={22} strokeWidth={3} />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <button
+                                        key={dateStr}
+                                        onClick={() => handleDateClick(dateStr)}
+                                        className={`
+                                            aspect-square flex flex-col items-center justify-center rounded-lg transition-all relative border text-[10px]
+                                            ${isSelected
+                                                ? 'bg-slate-950 text-white border-slate-950 shadow-md scale-105 z-10'
+                                                : isToday
+                                                    ? 'bg-neon-green/20 border-neon-green text-slate-950'
+                                                    : isHighlightedWeek
+                                                        ? 'bg-slate-100 border-transparent text-slate-900 font-bold'
+                                                        : 'bg-transparent border-transparent text-slate-400 hover:bg-slate-50'
+                                            }
+                                        `}
+                                    >
+                                        <span>{parseInt(d)}</span>
+                                        {hasWorkout && (
+                                            <div className={`w-1 h-1 rounded-full mt-0.5 ${isSelected ? 'bg-neon-green' : 'bg-neon-green'}`} />
+                                        )}
+                                    </button>
                                 );
                             })}
                         </div>
-                    )}
-                </section>
-            </div>
+                    </div>
+
+                    {/* Quick Stats in Sidebar */}
+                    <div className="mt-4 px-1 flex flex-col gap-2">
+                        <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-400">
+                            <span>Training Streak</span>
+                            <span className="text-slate-900">{user.streak} Days</span>
+                        </div>
+                        <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                            <div className="bg-neon-green h-full" style={{ width: `${Math.min(100, (user.streak / 30) * 100)}%` }}></div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            {/* Main Content Area */}
+            <main>
+                {/* Header Info */}
+                <header className="mb-8">
+                    <div className={`text-[10px] font-black uppercase tracking-[0.2em] mb-2 ${isSelectedToday ? 'text-slate-400' : 'text-neon-green'}`}>
+                        {isSelectedToday ? 'TRACKING TODAY' : 'VIEWING DATE'} — {selDateObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                    </div>
+                    <h2 className="text-4xl font-black text-slate-950 italic tracking-tighter uppercase leading-none">
+                        {isRestDay ? "Active Recovery" : routine.name}
+                    </h2>
+                </header>
+
+                <div className="grid grid-cols-1 xl:grid-cols-[1fr_350px] gap-8">
+                    {/* Left Col: Exercises */}
+                    <div className="space-y-6">
+                        <section>
+                            <div className="flex items-center gap-2 mb-4">
+                                <Dumbbell size={16} className="text-slate-400" />
+                                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Training Session</h3>
+                            </div>
+
+                            {isRestDay ? (
+                                <div className="glass-card p-12 border-slate-200 text-center bg-slate-50/50">
+                                    <Award size={40} className="mx-auto text-slate-200 mb-4" />
+                                    <h4 className="text-lg font-black text-slate-400 italic mb-2 uppercase tracking-tighter">Growth happens in rest</h4>
+                                    <p className="text-slate-400 text-xs italic">Focus on mobility, hydration, and quality sleep today.</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {routine.exercises.map((ex) => {
+                                        const history = workoutHistory[ex.name] || { lastReps: 0, lastWeight: 0 };
+                                        const guideText = EXERCISE_GUIDE[ex.name];
+
+                                        return (
+                                            <div key={ex.id} className="glass-card border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
+                                                <div className="p-6">
+                                                    <div className="flex justify-between items-start mb-5">
+                                                        <div>
+                                                            <h3 className="text-xl font-black italic text-slate-950 uppercase tracking-tight">{ex.name}</h3>
+                                                            <div className="flex items-center gap-3 mt-1">
+                                                                <span className="text-neon-green text-[10px] font-black uppercase tracking-widest">{ex.target}</span>
+                                                                <span className="w-1 h-1 bg-slate-200 rounded-full"></span>
+                                                                <span className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">{ex.type}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 text-[10px] font-black uppercase flex items-center gap-2">
+                                                            <History size={12} className="text-slate-400" />
+                                                            <span className="text-slate-500">PB:</span>
+                                                            <span className="text-slate-950 font-black">{history.lastReps} {history.lastWeight > 0 ? `@ ${history.lastWeight}kg` : 'REPS'}</span>
+                                                        </div>
+                                                    </div>
+
+                                                    {guideText && (
+                                                        <div className="mb-6 p-4 bg-slate-50/80 border-l-4 border-neon-green/30 rounded-r-xl">
+                                                            <div className="flex items-center gap-2 mb-2">
+                                                                <Info size={14} className="text-slate-400" />
+                                                                <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">Technique Guide</span>
+                                                            </div>
+                                                            <p className="text-slate-600 text-[11px] leading-relaxed italic font-medium">{guideText}</p>
+                                                        </div>
+                                                    )}
+
+                                                    <div className="flex gap-3">
+                                                        <div className="flex-1 relative">
+                                                            <input
+                                                                type="number"
+                                                                placeholder="REPS PERFORMED"
+                                                                value={inputs[ex.id] || ''}
+                                                                onChange={(e) => handleInputChange(ex.id, e.target.value)}
+                                                                className="w-full bg-slate-50 border border-slate-100 rounded-xl py-4 px-5 text-slate-950 font-black text-sm focus:outline-none focus:ring-2 focus:ring-neon-green/20 focus:border-neon-green transition-all"
+                                                            />
+                                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[9px] font-black text-slate-300 uppercase">Input</span>
+                                                        </div>
+                                                        <button
+                                                            onClick={() => handleLog(ex)}
+                                                            className="aspect-square bg-slate-950 text-white flex items-center justify-center rounded-xl hover:bg-neon-green hover:text-black transition-all px-5 shadow-lg active:scale-95"
+                                                        >
+                                                            <CheckCircle2 size={24} strokeWidth={2.5} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </section>
+                    </div>
+
+                    {/* Right Col: Food Log */}
+                    <div className="space-y-6">
+                        <section className="lg:sticky lg:top-8">
+                            <div className="flex items-center gap-2 mb-4">
+                                <MessageSquare size={16} className="text-slate-400" />
+                                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Fuel Log</h3>
+                            </div>
+                            <div className="glass-card p-6 border-slate-200">
+                                <textarea
+                                    placeholder="Enter meals, macros, or notes for this date..."
+                                    value={foodLogInput}
+                                    onChange={(e) => setFoodLogInput(e.target.value)}
+                                    className="w-full bg-slate-50 border border-slate-100 rounded-2xl p-5 text-slate-950 text-sm focus:outline-none focus:ring-2 focus:ring-neon-green/10 focus:border-neon-green transition-all min-h-[200px] xl:min-h-[400px] resize-none mb-4 leading-relaxed font-medium"
+                                />
+                                <button
+                                    onClick={handleSaveFoodLog}
+                                    disabled={isSavingFoodLog}
+                                    className={`w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] transition-all shadow-sm ${isSavingFoodLog
+                                        ? 'bg-slate-50 text-slate-300'
+                                        : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-950 hover:text-white hover:border-slate-950'
+                                        }`}
+                                >
+                                    {isSavingFoodLog ? 'Syncing...' : 'Log Nutrition'}
+                                </button>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </main>
         </div>
     );
 };
