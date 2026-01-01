@@ -11,7 +11,10 @@ import {
     X,
     MessageSquare,
     LogOut,
-    Settings
+    Settings,
+    ChevronRight as ChevronRightIcon,
+    ChevronLeft as ChevronLeftIcon,
+    Flame
 } from 'lucide-react';
 
 const EXERCISE_GUIDE = {
@@ -82,6 +85,7 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
     const [inputs, setInputs] = useState({});
     const [foodLogInput, setFoodLogInput] = useState("");
     const [isSavingFoodLog, setIsSavingFoodLog] = useState(false);
+    const [isFuelLogOpen, setIsFuelLogOpen] = useState(false);
 
     const selDateObj = new Date(selectedDate);
     const dayOfWeek = selDateObj.getDay();
@@ -155,7 +159,7 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
     }
 
     return (
-        <div className="flex flex-col lg:grid lg:grid-cols-[240px_1fr] gap-10 min-h-screen animate-in fade-in duration-500 pb-32">
+        <div className="relative flex flex-col lg:grid lg:grid-cols-[240px_1fr] gap-10 min-h-screen animate-in fade-in duration-500 pb-32 overflow-x-hidden">
             {/* Sidebar: Navigation & Controls */}
             <aside className="lg:border-r lg:border-slate-100 lg:pr-8">
                 <div className="lg:sticky lg:top-8 flex flex-col h-full min-h-[calc(100vh-80px)]">
@@ -169,8 +173,8 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
 
                     {/* Compact Calendar */}
                     <div className="glass-card mb-8 p-3 bg-white/50 border-slate-100 shadow-sm overflow-hidden">
-                        <div className="flex justify-between items-center mb-3">
-                            <h3 className="text-[10px] font-black uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                        <div className="flex justify-between items-center mb-3 text-slate-900">
+                            <h3 className="text-[10px] font-black uppercase tracking-wider flex items-center gap-2">
                                 <Calendar size={12} className="text-neon-green" />
                                 {fullMonthNames[viewMonth]}
                             </h3>
@@ -248,7 +252,7 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
             </aside>
 
             {/* Main Content Area */}
-            <main className="max-w-4xl">
+            <main className={`max-w-5xl transition-all duration-500 ${isFuelLogOpen ? 'lg:pr-[380px]' : ''}`}>
                 {/* Header Info */}
                 <header className="mb-12 border-b border-slate-100 pb-8">
                     <div className="flex items-center gap-3 mb-3">
@@ -268,8 +272,8 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
                     </h2>
                 </header>
 
-                <div className="grid grid-cols-1 xl:grid-cols-[1fr_380px] gap-12 items-start">
-                    {/* Left Col: Exercises */}
+                <div className="max-w-4xl mx-auto xl:mx-0">
+                    {/* Training Session */}
                     <div className="space-y-8">
                         <section>
                             <div className="flex items-center gap-3 mb-6">
@@ -290,7 +294,7 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
                                         const guideText = EXERCISE_GUIDE[ex.name];
 
                                         return (
-                                            <div key={ex.id} className="glass-card border-slate-200 overflow-hidden shadow-sm hover:shadow-xl hover:translate-x-1 transition-all duration-300 bg-white/80">
+                                            <div key={ex.id} className="glass-card border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 bg-white/80">
                                                 <div className="p-8">
                                                     <div className="flex justify-between items-center mb-6">
                                                         <div>
@@ -344,21 +348,44 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
                             )}
                         </section>
                     </div>
+                </div>
+            </main>
 
-                    {/* Right Col: Food Log (Floating Down) */}
-                    <div className="xl:sticky xl:top-8 flex flex-col gap-10">
-                        <section>
-                            <div className="flex items-center gap-3 mb-6">
+            {/* Collapsible Fuel Log Drawer (Far Right) */}
+            <div
+                className={`fixed top-0 right-0 h-full bg-white border-l border-slate-100 shadow-2xl transition-all duration-500 z-[100] ${isFuelLogOpen ? 'w-full lg:w-[380px]' : 'w-0'}`}
+            >
+                {/* Drawer Tab / Toggle */}
+                <button
+                    onClick={() => setIsFuelLogOpen(!isFuelLogOpen)}
+                    className="absolute top-1/2 -left-12 -translate-y-1/2 bg-slate-950 text-white p-4 rounded-l-2xl shadow-xl hover:bg-neon-green hover:text-black transition-all flex flex-col items-center gap-2 uppercase text-[9px] font-black vertical-text group"
+                >
+                    {isFuelLogOpen ? <ChevronRightIcon size={16} /> : <ChevronLeftIcon size={16} />}
+                    <span className="tracking-widest py-2">Metabolic Fuel</span>
+                    <Flame size={12} className={isFuelLogOpen ? 'text-neon-green' : 'text-orange-500 group-hover:animate-pulse'} />
+                </button>
+
+                {/* Drawer Content */}
+                {isFuelLogOpen && (
+                    <div className="p-8 h-full flex flex-col animate-in slide-in-from-right duration-500">
+                        <div className="flex items-center justify-between mb-8">
+                            <div className="flex items-center gap-3">
                                 <MessageSquare size={20} className="text-slate-950" />
                                 <h3 className="text-sm font-black uppercase tracking-[0.3em] text-slate-950">Metabolic Fuel</h3>
                             </div>
-                            <div className="glass-card p-8 border-slate-200 bg-white/60 shadow-lg">
+                            <button onClick={() => setIsFuelLogOpen(false)} className="text-slate-300 hover:text-slate-950 transition-colors">
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        <div className="flex-grow flex flex-col gap-6">
+                            <div className="glass-card p-8 border-slate-200 bg-slate-50/50 shadow-inner flex-grow flex flex-col">
                                 <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 block">Bio-Data Intake Log</div>
                                 <textarea
                                     placeholder="Enter meals, nutrients, or system notes..."
                                     value={foodLogInput}
                                     onChange={(e) => setFoodLogInput(e.target.value)}
-                                    className="w-full bg-slate-50/50 border-2 border-slate-100 rounded-3xl p-6 text-slate-950 text-base focus:outline-none focus:ring-4 focus:ring-neon-green/5 focus:border-neon-green transition-all min-h-[300px] resize-none mb-6 leading-relaxed font-bold placeholder:italic"
+                                    className="w-full bg-white border-2 border-slate-100 rounded-3xl p-6 text-slate-950 text-base focus:outline-none focus:ring-4 focus:ring-neon-green/5 focus:border-neon-green transition-all flex-grow resize-none mb-6 leading-relaxed font-bold placeholder:italic"
                                 />
                                 <button
                                     onClick={handleSaveFoodLog}
@@ -371,15 +398,24 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
                                     {isSavingFoodLog ? 'Syncing...' : 'Log Nutrition'}
                                 </button>
                             </div>
-                        </section>
 
-                        {/* Motivational Quote or Status */}
-                        <div className="px-6 italic text-slate-400 text-sm font-medium leading-relaxed border-l-4 border-slate-100">
-                            "Discipline is the engine that converts intent into outcomes. The Titan does not bargain with fatigue."
+                            <div className="px-6 italic text-slate-400 text-sm font-medium leading-relaxed border-l-4 border-slate-100 py-2">
+                                "The Titan does not bargain with fatigue. Nutrition is the reinforcement for the coming war."
+                            </div>
                         </div>
                     </div>
-                </div>
-            </main>
+                )}
+            </div>
+
+            {/* CSS for Vertical Text */}
+            <style dangerouslySetInnerHTML={{
+                __html: `
+                .vertical-text {
+                    writing-mode: vertical-rl;
+                    text-orientation: mixed;
+                    transform: rotate(180deg);
+                }
+            `}} />
         </div>
     );
 };
