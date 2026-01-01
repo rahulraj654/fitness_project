@@ -31,7 +31,7 @@ app.use(session({
 }));
 
 // CSRF Protection
-const csrfProtection = csrf({ cookie: true });
+const csrfProtection = csrf({ cookie: false });
 
 // --- Auth Middleware ---
 const requireAuth = (req, res, next) => {
@@ -50,11 +50,47 @@ const requireAuth = (req, res, next) => {
 
 // Serve Login Page
 app.get('/login.html', csrfProtection, (req, res) => {
-    // If already logged in, redirect to dashboard
     if (req.session.user) {
         return res.redirect('/');
     }
     res.sendFile(path.join(__dirname, '../public/login.html'));
+});
+
+// GET /api/csrf-token - Allow frontend to fetch a fresh token
+app.get('/api/csrf-token', csrfProtection, (req, res) => {
+    res.json({ csrfToken: req.csrfToken() });
+});
+
+// Login Endpoint (Exempt from global CSRF check below)
+app.post('/login', (req, res) => {
+    const { username, password } = req.body;
+    if (username === 'admin' && password === 'password') {
+        req.session.user = { username: 'admin', role: 'admin' };
+        res.redirect('/');
+    } else {
+        res.redirect('/login.html?error=invalid_credentials');
+    }
+});
+
+// Logout Endpoint (Exempt from global CSRF check below)
+app.post('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            return res.status(500).json({ error: 'Could not log out' });
+        }
+        res.clearCookie('connect.sid');
+        res.clearCookie('XSRF-TOKEN');
+        res.status(200).json({ message: 'Logged out' });
+    });
+});
+
+// Apply Global CSRF Protection to all routes below this point
+app.use(csrfProtection);
+
+// Set XSRF-TOKEN cookie for the frontend on every request
+app.use((req, res, next) => {
+    res.cookie('XSRF-TOKEN', req.csrfToken(), { httpOnly: false });
+    next();
 });
 
 // Since we are serving static files, we might need a specific route for root
@@ -68,49 +104,6 @@ app.get('/', (req, res, next) => {
 
 // Serve Static Files (Public)
 app.use(express.static(path.join(__dirname, '../public')));
-
-// GET /api/csrf-token - To get token for frontend (if needed mainly for SPA, but here we bake it into forms usually or fetch it)
-// We will set cookie 'XSRF-TOKEN' which script.js reads. 
-// csurf middleware automatically checks X-XSRF-Token header.
-app.use(csrfProtection);
-app.use((req, res, next) => {
-    res.cookie('XSRF-TOKEN', req.csrfToken());
-    next();
-});
-
-
-// Login Endpoint
-app.post('/login', (req, res) => {
-    const { username, password } = req.body;
-
-    // TODO: Replace with Real Database Check
-    // Demo Credentials: admin / password
-    if (username === 'admin' && password === 'password') {
-        req.session.user = { username: 'admin', role: 'admin' };
-
-        // Return JSON success or Redirect? 
-        // original WFO login was form submit, let's keep it handled via form or JS.
-        // If JS handles it:
-        // res.json({ success: true, redirect: '/' });
-
-        // If standardized form submit:
-        res.redirect('/');
-    } else {
-        // Redirect back with error
-        res.redirect('/login.html?error=invalid_credentials');
-    }
-});
-
-// Logout Endpoint
-app.post('/logout', (req, res) => {
-    req.session.destroy((err) => {
-        if (err) {
-            return res.status(500).json({ error: 'Could not log out' });
-        }
-        res.clearCookie('connect.sid'); // clear session cookie
-        res.status(200).json({ message: 'Logged out' }); // Client handles redirect
-    });
-});
 
 // --- API Routes (Protected) ---
 app.use('/api', requireAuth);
