@@ -158,32 +158,31 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
             {/* Sidebar: Calendar */}
             <aside className="space-y-6">
                 <div className="lg:sticky lg:top-8">
-                    <div className="glass-card p-4 border-slate-200 shadow-sm overflow-hidden bg-white/80">
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-[11px] font-black uppercase tracking-wider text-slate-900 flex items-center gap-2">
-                                <Calendar size={14} className="text-neon-green" />
+                    <div className="glass-card p-3 border-slate-200 shadow-sm overflow-hidden bg-white/80">
+                        <div className="flex justify-between items-center mb-3">
+                            <h3 className="text-[10px] font-black uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                                <Calendar size={12} className="text-neon-green" />
                                 {fullMonthNames[viewMonth]} <span className="text-slate-400 font-bold">{viewYear}</span>
                             </h3>
                             <div className="flex gap-0.5">
-                                <button onClick={handlePrevMonth} className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-900 transition-colors">
-                                    <ChevronLeft size={14} />
+                                <button onClick={handlePrevMonth} className="p-1 hover:bg-slate-100 rounded-md text-slate-400 hover:text-slate-900 transition-colors">
+                                    <ChevronLeft size={12} />
                                 </button>
-                                <button onClick={handleNextMonth} className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-900 transition-colors">
-                                    <ChevronRight size={14} />
+                                <button onClick={handleNextMonth} className="p-1 hover:bg-slate-100 rounded-md text-slate-400 hover:text-slate-900 transition-colors">
+                                    <ChevronRight size={12} />
                                 </button>
                             </div>
                         </div>
 
-                        <div className="calendar-grid mb-1">
+                        {/* Calendar Sheet Grid */}
+                        <div className="grid grid-cols-7 gap-px bg-slate-100 border border-slate-100 rounded-lg overflow-hidden">
                             {dayNames.map(d => (
-                                <div key={d} className="text-[9px] font-black uppercase text-slate-400 text-center py-1.5">
+                                <div key={d} className="bg-white text-[8px] font-black uppercase text-slate-400 text-center py-2 border-b border-slate-50">
                                     {d}
                                 </div>
                             ))}
-                        </div>
-                        <div className="calendar-grid gap-1">
                             {calendarDays.map((dateStr, idx) => {
-                                if (!dateStr) return <div key={`empty-${idx}`} />;
+                                if (!dateStr) return <div key={`empty-${idx}`} className="bg-white" />;
 
                                 const isSelected = dateStr === selectedDate;
                                 const isToday = dateStr === todayStr;
@@ -197,20 +196,23 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
                                         key={dateStr}
                                         onClick={() => handleDateClick(dateStr)}
                                         className={`
-                                            aspect-square flex flex-col items-center justify-center rounded-lg transition-all relative border text-[10px]
+                                            aspect-square flex flex-col items-center justify-center transition-all relative text-[9px] font-bold
                                             ${isSelected
-                                                ? 'bg-slate-950 text-white border-slate-950 shadow-md scale-105 z-10'
+                                                ? 'bg-slate-950 text-white z-10 shadow-inner'
                                                 : isToday
-                                                    ? 'bg-neon-green/20 border-neon-green text-slate-950'
+                                                    ? 'bg-neon-green/30 text-slate-950 font-black'
                                                     : isHighlightedWeek
-                                                        ? 'bg-slate-100 border-transparent text-slate-900 font-bold'
-                                                        : 'bg-transparent border-transparent text-slate-400 hover:bg-slate-50'
+                                                        ? 'bg-neon-green/5 text-slate-900'
+                                                        : 'bg-white text-slate-400 hover:bg-slate-50'
                                             }
                                         `}
                                     >
                                         <span>{parseInt(d)}</span>
                                         {hasWorkout && (
-                                            <div className={`w-1 h-1 rounded-full mt-0.5 ${isSelected ? 'bg-neon-green' : 'bg-neon-green'}`} />
+                                            <div className={`w-1 h-1 rounded-full mt-0.5 ${isSelected ? 'bg-neon-green' : 'bg-neon-green/60'}`} />
+                                        )}
+                                        {isHighlightedWeek && !isSelected && (
+                                            <div className="absolute inset-0 border-y border-neon-green/10 pointer-events-none" />
                                         )}
                                     </button>
                                 );
