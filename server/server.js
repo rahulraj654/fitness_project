@@ -237,8 +237,8 @@ app.get('/api/stats', (req, res) => {
 });
 
 // Start Server
-// Binding to '127.0.0.1' ensures the server is ONLY accessible locally (or via SSH tunnel)
-// and NOT exposed to the public internet directly.
-app.listen(PORT, '127.0.0.1', () => {
-    console.log(`Server running on http://127.0.0.1:${PORT}`);
+// Binding to '0.0.0.0' allows the server to be accessible on all network interfaces.
+// If using an SSH tunnel, you can still access it via localhost:3001.
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on http://0.0.0.0:${PORT}`);
 });
