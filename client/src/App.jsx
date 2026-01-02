@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { getUserData, updateFoodLog, logWorkout, updateUser, logout } from './api/api';
 import Dashboard from './components/Dashboard';
 import SettingsModal from './components/SettingsModal';
-import { Settings } from 'lucide-react';
 
 const App = () => {
     const [data, setData] = useState(null);
@@ -73,25 +72,25 @@ const App = () => {
     };
 
     if (loading) return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-950 font-black italic tracking-widest text-2xl uppercase">
-            <div className="animate-pulse">Loading Titan...</div>
+        <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-950 font-bold text-xl">
+            <div className="animate-pulse">Loading...</div>
         </div>
     );
 
     if (!data) return (
         <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-900 px-6 text-center">
             <div className="glass-card p-8 border-slate-200">
-                <h2 className="text-2xl font-black italic text-slate-900 mb-4 uppercase">Sync Failure</h2>
-                <p className="text-slate-500 mb-6">Unable to connect to Titan server. Please check your network.</p>
-                <button onClick={() => window.location.reload()} className="btn-primary w-full">RETRY SYNC</button>
+                <h2 className="text-2xl font-bold text-slate-900 mb-4">Connection Failed</h2>
+                <p className="text-slate-500 mb-6">Unable to connect to server. Please check your network.</p>
+                <button onClick={() => window.location.reload()} className="btn-primary w-full">Retry</button>
             </div>
         </div>
     );
 
     return (
         <div className="min-h-screen bg-slate-50 text-slate-900">
-            {/* Unified Dashboard */}
-            <main className="max-w-5xl mx-auto px-6 pt-8">
+            {/* Main Dashboard */}
+            <main>
                 <Dashboard
                     user={data.user}
                     workoutHistory={data.workoutHistory}
