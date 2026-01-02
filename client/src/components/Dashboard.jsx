@@ -1,172 +1,442 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-    CheckCircle2,
-    History,
-    Dumbbell,
-    ChevronLeft,
-    ChevronRight,
-    Calendar,
-    Award,
-    Info,
-    X,
-    MessageSquare,
-    LogOut,
-    Settings,
-    ChevronRight as ChevronRightIcon,
-    ChevronLeft as ChevronLeftIcon,
-    Flame,
-    Target,
-    Zap,
-    TrendingUp
+    CheckCircle2, History, Dumbbell, ChevronLeft, ChevronRight, Calendar,
+    Award, Info, X, MessageSquare, LogOut, Settings, Flame, Target, Zap,
+    TrendingUp, AlertTriangle, Play, Clock, Home, Menu, ChevronDown, ChevronUp
 } from 'lucide-react';
 
-// Enhanced Exercise Guide with hypertrophy-focused instructions
+// ============================================================================
+// BEGINNER-FOCUSED EXERCISE DATA
+// ============================================================================
+
 const EXERCISE_GUIDE = {
-    // Upper Body A
-    "Pushups": {
-        instruction: "Hands shoulder-width apart. Keep body in a straight line. Lower chest to floor with control.",
-        progress: "Too easy? Elevate your feet on a chair or add a 3-second pause at the bottom.",
-        feel: "Feel the stretch across your chest and tension in your triceps."
+    "Wall Pushups": {
+        difficulty: "Beginner",
+        equipment: "Wall",
+        steps: [
+            "Stand arm's length from a wall",
+            "Place palms flat on wall at shoulder height",
+            "Lean in, bending elbows to bring chest toward wall",
+            "Push back to start position"
+        ],
+        mistakes: ["Standing too close to wall", "Flaring elbows out wide", "Not engaging core"],
+        feel: "Chest and front shoulders working",
+        easier: "Stand closer to the wall",
+        harder: "Progress to incline pushups on a table",
+        videoTip: "Keep your body straight like a plank"
     },
-    "Door Rows": {
-        instruction: "Wrap towel around doorknob or hold frame. Lean back, pull chest to door, squeeze back muscles.",
-        progress: "Increase the angle (lean back more) or use one arm at a time.",
-        feel: "Feel your shoulder blades squeeze together and lats engage."
+    "Incline Pushups": {
+        difficulty: "Beginner",
+        equipment: "Table or sturdy chair",
+        steps: [
+            "Place hands on table edge, shoulder-width apart",
+            "Walk feet back until body is straight",
+            "Lower chest toward table edge",
+            "Push back up with control"
+        ],
+        mistakes: ["Sagging hips", "Looking up instead of neutral neck", "Going too fast"],
+        feel: "Chest stretch at bottom, triceps working on push",
+        easier: "Use a higher surface like a counter",
+        harder: "Progress to knee pushups on floor",
+        videoTip: "Keep elbows at 45° angle, not flared out"
     },
-    "DB Lateral Raises": {
-        instruction: "Stand tall. Lift weights out to sides until shoulder height. 'Pour the pitcher' at the top.",
-        progress: "Slow down the negative (3 seconds down) or add a pause at the top.",
-        feel: "Feel the burn in the middle of your shoulder cap (medial deltoid)."
+    "Knee Pushups": {
+        difficulty: "Beginner",
+        equipment: "Yoga mat or soft surface",
+        steps: [
+            "Start on hands and knees, hands slightly wider than shoulders",
+            "Cross ankles and lift feet off floor",
+            "Lower chest to the ground slowly (3 seconds)",
+            "Push back up to start"
+        ],
+        mistakes: ["Hips too high in the air", "Not going low enough", "Rushing the movement"],
+        feel: "Chest burning, triceps engaged",
+        easier: "Reduce range of motion",
+        harder: "Try 1-2 regular pushups between sets",
+        videoTip: "Imagine pushing the floor away from you"
     },
     "DB Bicep Curls": {
-        instruction: "Elbows pinned to your sides. Curl weight up, lower SLOWLY (3 seconds down).",
-        progress: "Add a 2-second squeeze at the top or switch to alternating arms.",
-        feel: "Feel the bicep peak contract hard at the top of each rep."
+        difficulty: "Beginner",
+        equipment: "2x 2kg dumbbells",
+        steps: [
+            "Stand with dumbbells at sides, palms facing forward",
+            "Keep elbows pinned to your ribs",
+            "Curl weights up toward shoulders",
+            "Lower slowly over 3 seconds (this is key!)"
+        ],
+        mistakes: ["Swinging body for momentum", "Moving elbows forward", "Dropping weight too fast"],
+        feel: "Biceps burning, especially at the top",
+        easier: "Curl one arm at a time",
+        harder: "Add 2-second squeeze at top",
+        videoTip: "Slow negatives = more muscle growth with light weights"
     },
-    // Lower Body A
-    "Bulgarian Split Squats": {
-        instruction: "One foot on chair behind you. Hop front foot forward. Lower until front thigh is parallel.",
-        progress: "Hold water jugs or a loaded backpack. Add deficit under front foot.",
-        feel: "Feel deep stretch in rear hip flexor and quad burn in front leg."
+    "DB Lateral Raises": {
+        difficulty: "Beginner",
+        equipment: "2x 2kg dumbbells",
+        steps: [
+            "Stand tall, dumbbells at your sides",
+            "Raise arms out to sides until shoulder height",
+            "Slight bend in elbows, 'pour the pitcher' at top",
+            "Lower slowly with control"
+        ],
+        mistakes: ["Using momentum/swinging", "Shrugging shoulders up", "Lifting too high"],
+        feel: "Burn in middle of shoulder cap (side delts)",
+        easier: "Raise to 45° instead of 90°",
+        harder: "Add 1-second pause at top",
+        videoTip: "Lead with your elbows, not your hands"
+    },
+    "DB Overhead Press": {
+        difficulty: "Beginner",
+        equipment: "2x 2kg dumbbells",
+        steps: [
+            "Hold dumbbells at shoulder height, palms forward",
+            "Press weights straight overhead",
+            "Fully extend arms without locking elbows",
+            "Lower back to shoulders with control"
+        ],
+        mistakes: ["Arching lower back", "Pressing forward instead of up", "Not full range of motion"],
+        feel: "Front and side shoulders working hard",
+        easier: "Seated on a chair for back support",
+        harder: "Single arm press for core challenge",
+        videoTip: "Brace your core like someone's about to poke your belly"
     },
     "Bodyweight Squats": {
-        instruction: "Feet shoulder-width. Sit back like sitting in a chair. Keep chest up, go below parallel.",
-        progress: "Slow the tempo to 4 seconds down, or try 1.5 rep squats (down, half up, down, full up).",
-        feel: "Feel your quads burning and glutes activating as you drive up."
+        difficulty: "Beginner",
+        equipment: "None",
+        steps: [
+            "Stand with feet shoulder-width apart",
+            "Push hips back and bend knees",
+            "Lower until thighs are parallel (or as low as comfortable)",
+            "Drive through heels to stand back up"
+        ],
+        mistakes: ["Knees caving inward", "Coming up on toes", "Not going deep enough"],
+        feel: "Quads and glutes burning",
+        easier: "Squat to a chair and stand up",
+        harder: "3-second lowering phase",
+        videoTip: "Push your knees out over your toes, not inward"
     },
-    "DB Calf Raises": {
-        instruction: "Stand on edge of step (optional). Lift heels as high as possible. Squeeze hard at top.",
-        progress: "Single-leg calf raises or add a 3-second hold at the top.",
-        feel: "Feel the calf muscle fully contract and stretch through full range."
+    "Glute Bridges": {
+        difficulty: "Beginner",
+        equipment: "Yoga mat",
+        steps: [
+            "Lie on back, knees bent, feet flat on floor",
+            "Push through heels to lift hips toward ceiling",
+            "Squeeze glutes HARD at the top for 2 seconds",
+            "Lower slowly back down"
+        ],
+        mistakes: ["Using lower back instead of glutes", "Not squeezing at top", "Feet too far from butt"],
+        feel: "Glutes firing, NOT lower back strain",
+        easier: "Reduce range of motion",
+        harder: "Single leg glute bridge",
+        videoTip: "Imagine cracking a walnut between your butt cheeks at the top"
+    },
+    "Lunges": {
+        difficulty: "Beginner",
+        equipment: "None (use wall for balance if needed)",
+        steps: [
+            "Stand tall, take a big step forward",
+            "Lower until both knees are at 90 degrees",
+            "Front knee stays over ankle, not past toes",
+            "Push through front heel to return to start"
+        ],
+        mistakes: ["Knee going past toes", "Leaning forward too much", "Short steps"],
+        feel: "Front leg quad and glute, rear leg hip flexor stretch",
+        easier: "Hold onto wall or chair for balance",
+        harder: "Walking lunges or add dumbbells",
+        videoTip: "Think 'down' not 'forward' - drop straight down"
     },
     "Plank": {
-        instruction: "Forearms on floor. Body in straight line. Brace abs like bracing for a punch.",
-        progress: "Add weight on your back or try body saw (shift forward/backward).",
-        feel: "Feel your entire core working - abs, obliques, and lower back."
+        difficulty: "Beginner",
+        equipment: "Yoga mat",
+        steps: [
+            "Forearms on floor, elbows under shoulders",
+            "Extend legs back, toes on floor",
+            "Keep body in straight line from head to heels",
+            "Hold position, breathing steadily"
+        ],
+        mistakes: ["Hips sagging low", "Butt too high", "Holding breath"],
+        feel: "Entire core engaged - abs, obliques, lower back",
+        easier: "Knees on the floor (half plank)",
+        harder: "Lift one foot off the ground",
+        videoTip: "Brace your abs like you're about to get punched"
     },
-    // Upper Body B
-    "Pike Pushups": {
-        instruction: "Downward dog position (V-shape). Lower top of head toward floor. Press back up.",
-        progress: "Elevate feet on a chair for more shoulder emphasis.",
-        feel: "Feel the front of your shoulders (anterior deltoids) doing the work."
+    "DB Rows": {
+        difficulty: "Beginner",
+        equipment: "2kg dumbbell + chair",
+        steps: [
+            "Place one hand and knee on chair for support",
+            "Hold dumbbell in free hand, arm hanging down",
+            "Pull dumbbell up toward hip, squeezing shoulder blade",
+            "Lower slowly with control"
+        ],
+        mistakes: ["Rotating torso", "Using momentum", "Not pulling high enough"],
+        feel: "Lats and mid-back squeezing",
+        easier: "Both hands on table, row with lighter objects",
+        harder: "Pause 2 seconds at top of each rep",
+        videoTip: "Imagine starting a lawnmower - elbow drives back"
     },
-    "Diamond Pushups": {
-        instruction: "Hands together forming diamond shape. Lower chest to hands. Keep elbows tucked.",
-        progress: "Add a pause at the bottom or elevate feet.",
-        feel: "Feel the inner chest and triceps working intensely."
-    },
-    "DB Front Raises": {
-        instruction: "Arms straight, raise weight to eye level. Control the descent.",
-        progress: "Alternate arms or add a pause at the top.",
-        feel: "Feel the front of your shoulder burning through the movement."
-    },
-    "DB Overhead Extensions": {
-        instruction: "Hold weight overhead, lower behind head, extend back up. Keep elbows pointed up.",
-        progress: "Slow the negative to 4 seconds or use a heavier object.",
-        feel: "Feel the long head of your triceps stretch and contract."
-    },
-    // Lower Body B - HYPERTROPHY FOCUSED
-    "Single-Leg Hip Thrusts": {
-        instruction: "Back on couch/chair for support. One leg extended. Drive through heel, squeeze glute at top.",
-        progress: "Add a 3-second hold at the top or place a heavy book on your hip.",
-        feel: "Feel the burn in your glute, NOT your lower back or hamstring."
-    },
-    "Deficit Bulgarian Split Squats": {
-        instruction: "Front foot on a book/platform for deficit. Rear foot on chair. Focus on 3-second controlled descent.",
-        progress: "Hold water jugs, wear a loaded backpack, or increase the deficit height.",
-        feel: "Feel deep quad stretch and intense glute activation on the working leg."
-    },
-    "Sliding Hamstring Curls": {
-        instruction: "Lie on back, heels on towel/socks on smooth floor. Lift hips, slide heels toward glutes.",
-        progress: "Single-leg variation or add a pause when fully contracted.",
-        feel: "Feel your hamstrings cramping as they curl - this is the posterior chain working."
-    },
-    "Lying Leg Lifts w/ Hip Lift": {
-        instruction: "Legs straight up. Lower slowly, then at the top, add a hip thrust toward ceiling.",
-        progress: "Slower tempo or add ankle weights. Hold something overhead for stability.",
-        feel: "Feel your lower abs compress and hip flexors engage. Core should be on fire."
+    "Calf Raises": {
+        difficulty: "Beginner",
+        equipment: "Wall for balance",
+        steps: [
+            "Stand on flat floor, hand on wall for balance",
+            "Rise up on the balls of your feet as high as possible",
+            "Squeeze calves at the top for 1 second",
+            "Lower slowly back down"
+        ],
+        mistakes: ["Not going high enough", "Rushing the movement", "Bending knees"],
+        feel: "Calf muscles burning",
+        easier: "Use both hands on wall for balance",
+        harder: "Single leg calf raises",
+        videoTip: "Pretend you're trying to see over a crowd"
     }
+};
+
+// 3-Month Progressive Program
+const PROGRAM_PHASES = {
+    1: { name: "Foundation", focus: "Learn proper form", reps: "12-15", weeks: "1-4" },
+    2: { name: "Growth", focus: "Build volume", reps: "10-12", weeks: "5-8" },
+    3: { name: "Intensity", focus: "Maximize tension", reps: "8-10", weeks: "9-12" }
 };
 
 const routines = {
     1: {
-        name: "Upper Body A",
-        subtitle: "Push & Pull Foundation",
+        name: "Upper Push",
+        subtitle: "Chest & Shoulders",
+        icon: "💪",
+        warmup: ["20 arm circles", "10 shoulder shrugs", "10 wall slides"],
         exercises: [
-            { id: "pushups", name: "Pushups", target: "3 x 8-12", type: "BW", tempo: "3-1-2" },
-            { id: "door_rows", name: "Door Rows", target: "3 x 10-12", type: "BW", tempo: "2-1-3" },
-            { id: "lateral_raises", name: "DB Lateral Raises", target: "4 x 12-15", type: "DB", weight: 2, tempo: "2-1-2" },
-            { id: "bicep_curls", name: "DB Bicep Curls", target: "3 x 10-12", type: "DB", weight: 2, tempo: "2-1-3" },
-        ]
+            { id: "incline_pushups", name: "Incline Pushups", target: "3 x 10-12", type: "BW", tempo: "2-1-2", rest: 60 },
+            { id: "db_overhead_press", name: "DB Overhead Press", target: "3 x 12-15", type: "DB", weight: 2, tempo: "2-1-2", rest: 60 },
+            { id: "db_lateral_raises", name: "DB Lateral Raises", target: "3 x 12-15", type: "DB", weight: 2, tempo: "2-1-3", rest: 45 },
+        ],
+        cooldown: ["30s chest stretch each side", "30s shoulder stretch each side"]
     },
     2: {
-        name: "Lower Body A",
-        subtitle: "Quad Dominant",
+        name: "Lower Body",
+        subtitle: "Legs & Glutes",
+        icon: "🦵",
+        warmup: ["20 leg swings each side", "10 hip circles", "10 bodyweight squats"],
         exercises: [
-            { id: "split_squats", name: "Bulgarian Split Squats", target: "3 x 8-10/leg", type: "BW", tempo: "3-1-2" },
-            { id: "bw_squats", name: "Bodyweight Squats", target: "3 x 15-20", type: "BW", tempo: "3-1-1" },
-            { id: "calf_raises", name: "DB Calf Raises", target: "4 x 15-20", type: "DB", weight: 2, tempo: "2-2-2" },
-            { id: "plank", name: "Plank", target: "3 x 45-60s", type: "BW" },
-        ]
+            { id: "bodyweight_squats", name: "Bodyweight Squats", target: "3 x 15-20", type: "BW", tempo: "3-1-2", rest: 60 },
+            { id: "lunges", name: "Lunges", target: "3 x 10/leg", type: "BW", tempo: "2-1-1", rest: 60 },
+            { id: "glute_bridges", name: "Glute Bridges", target: "3 x 15", type: "BW", tempo: "2-2-1", rest: 45 },
+            { id: "calf_raises", name: "Calf Raises", target: "3 x 20", type: "BW", tempo: "2-1-2", rest: 30 },
+        ],
+        cooldown: ["30s quad stretch each side", "30s hamstring stretch", "30s calf stretch each side"]
     },
     4: {
-        name: "Upper Body B",
-        subtitle: "Shoulder & Arm Focus",
+        name: "Upper Pull",
+        subtitle: "Back & Biceps",
+        icon: "🎯",
+        warmup: ["10 cat-cow stretches", "20 arm circles", "10 scapular squeezes"],
         exercises: [
-            { id: "pike_pushups", name: "Pike Pushups", target: "3 x 8-10", type: "BW", tempo: "3-1-2" },
-            { id: "diamond_pushups", name: "Diamond Pushups", target: "3 x 8-12", type: "BW", tempo: "3-1-1" },
-            { id: "front_raises", name: "DB Front Raises", target: "3 x 12-15", type: "DB", weight: 2, tempo: "2-1-2" },
-            { id: "overhead_extensions", name: "DB Overhead Extensions", target: "3 x 10-12", type: "DB", weight: 2, tempo: "2-1-3" },
-        ]
+            { id: "db_rows", name: "DB Rows", target: "3 x 12/arm", type: "DB", weight: 2, tempo: "2-1-3", rest: 60 },
+            { id: "db_bicep_curls", name: "DB Bicep Curls", target: "3 x 12-15", type: "DB", weight: 2, tempo: "2-1-3", rest: 45 },
+            { id: "plank", name: "Plank", target: "3 x 30-45s", type: "BW", rest: 45 },
+        ],
+        cooldown: ["30s lat stretch each side", "30s bicep stretch", "30s lower back twist each side"]
     },
     5: {
-        name: "Lower Body B",
-        subtitle: "Glute & Hamstring Hypertrophy",
+        name: "Full Body",
+        subtitle: "Compound Focus",
+        icon: "⚡",
+        warmup: ["Jumping jacks 30s", "Arm circles 20", "Leg swings 10 each"],
         exercises: [
-            { id: "single_leg_hip_thrusts", name: "Single-Leg Hip Thrusts", target: "3 x 10-12/leg", type: "BW", tempo: "2-2-1" },
-            { id: "deficit_bulgarian_split_squats", name: "Deficit Bulgarian Split Squats", target: "3 x 8-10/leg", type: "BW", tempo: "3-1-1" },
-            { id: "sliding_hamstring_curls", name: "Sliding Hamstring Curls", target: "3 x 8-12", type: "BW", tempo: "2-1-3" },
-            { id: "lying_leg_lifts_hip_lift", name: "Lying Leg Lifts w/ Hip Lift", target: "3 x 10-12", type: "BW", tempo: "2-1-2" },
-        ]
-    },
+            { id: "knee_pushups", name: "Knee Pushups", target: "3 x 10-12", type: "BW", tempo: "2-1-2", rest: 60 },
+            { id: "bodyweight_squats2", name: "Bodyweight Squats", target: "3 x 15", type: "BW", tempo: "3-1-1", rest: 60 },
+            { id: "db_rows2", name: "DB Rows", target: "3 x 10/arm", type: "DB", weight: 2, tempo: "2-1-2", rest: 45 },
+            { id: "glute_bridges2", name: "Glute Bridges", target: "3 x 12", type: "BW", tempo: "2-2-1", rest: 45 },
+        ],
+        cooldown: ["Full body stretch 2 minutes"]
+    }
 };
 
 const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const fullMonthNames = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-];
+const fullMonthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+// ============================================================================
+// REST TIMER COMPONENT
+// ============================================================================
+
+const RestTimer = ({ seconds, onComplete, onCancel }) => {
+    const [timeLeft, setTimeLeft] = useState(seconds);
+    const [isRunning, setIsRunning] = useState(true);
+
+    useEffect(() => {
+        if (!isRunning || timeLeft <= 0) {
+            if (timeLeft <= 0) onComplete?.();
+            return;
+        }
+        const timer = setInterval(() => setTimeLeft(t => t - 1), 1000);
+        return () => clearInterval(timer);
+    }, [timeLeft, isRunning, onComplete]);
+
+    const circumference = 2 * Math.PI * 45;
+    const progress = (timeLeft / seconds) * circumference;
+
+    return (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[200]">
+            <div className="bg-white rounded-3xl p-8 text-center shadow-2xl max-w-sm mx-4">
+                <h3 className="text-lg font-bold text-slate-600 mb-4 uppercase tracking-wide">Rest Time</h3>
+                <div className="relative w-32 h-32 mx-auto mb-6">
+                    <svg className="w-full h-full timer-ring">
+                        <circle cx="64" cy="64" r="45" stroke="#e2e8f0" strokeWidth="8" fill="none" />
+                        <circle cx="64" cy="64" r="45" stroke="#39FF14" strokeWidth="8" fill="none"
+                            strokeDasharray={circumference} strokeDashoffset={circumference - progress}
+                            strokeLinecap="round" className="transition-all duration-1000" />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-4xl font-black text-slate-900">{timeLeft}</span>
+                    </div>
+                </div>
+                <p className="text-slate-500 text-sm mb-4">Get ready for the next set!</p>
+                <div className="flex gap-3">
+                    <button onClick={() => setTimeLeft(t => t + 15)} className="flex-1 py-2 px-4 bg-slate-100 rounded-xl font-bold text-slate-600">+15s</button>
+                    <button onClick={onCancel} className="flex-1 py-2 px-4 bg-slate-900 text-white rounded-xl font-bold">Skip</button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// ============================================================================
+// EXERCISE CARD COMPONENT
+// ============================================================================
+
+const ExerciseCard = ({ exercise, guide, history, onLog, inputValue, onInputChange, onStartRest }) => {
+    const [expanded, setExpanded] = useState(false);
+
+    return (
+        <div className="glass-card overflow-hidden animate-fade-in-up">
+            {/* Header */}
+            <div className="p-4 md:p-6">
+                <div className="flex justify-between items-start gap-3 mb-3">
+                    <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                            {guide?.difficulty === "Beginner" && (
+                                <span className="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">BEGINNER</span>
+                            )}
+                            <span className="text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">{exercise.type === "DB" ? "2kg DBs" : "Bodyweight"}</span>
+                        </div>
+                        <h3 className="text-lg md:text-xl font-black text-slate-900">{exercise.name}</h3>
+                        <div className="flex flex-wrap items-center gap-2 mt-2">
+                            <span className="text-sm font-bold text-neon-green bg-neon-green/10 px-3 py-1 rounded-full">{exercise.target}</span>
+                            {exercise.tempo && <span className="text-xs text-slate-500 font-medium">Tempo: {exercise.tempo}</span>}
+                        </div>
+                    </div>
+                    <div className="text-right bg-slate-50 px-3 py-2 rounded-xl">
+                        <div className="text-[9px] font-bold text-slate-400 uppercase">Last</div>
+                        <div className="text-sm font-black text-slate-900">{history.lastReps || "-"}</div>
+                    </div>
+                </div>
+
+                {/* Expand/Collapse Guide */}
+                <button onClick={() => setExpanded(!expanded)} className="w-full flex items-center justify-between p-3 bg-slate-50 rounded-xl mt-3 touch-target">
+                    <span className="text-sm font-bold text-slate-600 flex items-center gap-2">
+                        <Info size={14} /> How to do this exercise
+                    </span>
+                    {expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                </button>
+
+                {/* Expanded Guide */}
+                {expanded && guide && (
+                    <div className="mt-4 space-y-4 animate-fade-in-up">
+                        {/* Step by Step */}
+                        <div className="bg-blue-50 rounded-xl p-4">
+                            <h4 className="text-xs font-black text-blue-800 uppercase mb-2 flex items-center gap-2">
+                                <Play size={12} /> Step-by-Step
+                            </h4>
+                            <ol className="space-y-2">
+                                {guide.steps.map((step, i) => (
+                                    <li key={i} className="flex gap-3 text-sm text-slate-700">
+                                        <span className="w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center text-xs font-bold text-blue-800 flex-shrink-0">{i + 1}</span>
+                                        <span>{step}</span>
+                                    </li>
+                                ))}
+                            </ol>
+                        </div>
+
+                        {/* Common Mistakes */}
+                        <div className="bg-amber-50 rounded-xl p-4">
+                            <h4 className="text-xs font-black text-amber-800 uppercase mb-2 flex items-center gap-2">
+                                <AlertTriangle size={12} /> Common Mistakes
+                            </h4>
+                            <ul className="space-y-1">
+                                {guide.mistakes.map((m, i) => (
+                                    <li key={i} className="text-sm text-slate-700 flex items-start gap-2">
+                                        <span className="text-amber-500">•</span> {m}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        {/* What You Should Feel */}
+                        <div className="bg-purple-50 rounded-xl p-4">
+                            <h4 className="text-xs font-black text-purple-800 uppercase mb-2 flex items-center gap-2">
+                                <Target size={12} /> What You Should Feel
+                            </h4>
+                            <p className="text-sm text-slate-700">{guide.feel}</p>
+                        </div>
+
+                        {/* Easier/Harder */}
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="bg-green-50 rounded-xl p-3">
+                                <h4 className="text-[10px] font-black text-green-700 uppercase mb-1">📉 Too Hard?</h4>
+                                <p className="text-xs text-slate-600">{guide.easier}</p>
+                            </div>
+                            <div className="bg-red-50 rounded-xl p-3">
+                                <h4 className="text-[10px] font-black text-red-700 uppercase mb-1">📈 Too Easy?</h4>
+                                <p className="text-xs text-slate-600">{guide.harder}</p>
+                            </div>
+                        </div>
+
+                        {/* Pro Tip */}
+                        <div className="bg-slate-100 rounded-xl p-3 flex items-start gap-2">
+                            <Zap size={14} className="text-neon-green flex-shrink-0 mt-0.5" />
+                            <p className="text-xs text-slate-600"><strong>Pro Tip:</strong> {guide.videoTip}</p>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Input Section */}
+            <div className="p-4 md:p-6 pt-0 flex gap-3">
+                <input
+                    type="number"
+                    placeholder="Reps done"
+                    value={inputValue}
+                    onChange={(e) => onInputChange(e.target.value)}
+                    className="flex-1 bg-slate-50 border-2 border-slate-100 rounded-xl py-3 px-4 text-slate-900 font-bold text-center text-lg focus:outline-none focus:ring-2 focus:ring-neon-green/30 focus:border-neon-green touch-target"
+                />
+                <button onClick={onLog} className="px-5 bg-slate-900 text-white rounded-xl hover:bg-neon-green hover:text-black transition-all active:scale-95 touch-target">
+                    <CheckCircle2 size={24} />
+                </button>
+                {exercise.rest && (
+                    <button onClick={() => onStartRest(exercise.rest)} className="px-4 bg-blue-100 text-blue-700 rounded-xl hover:bg-blue-200 transition-all touch-target">
+                        <Clock size={20} />
+                    </button>
+                )}
+            </div>
+        </div>
+    );
+};
+
+// ============================================================================
+// MAIN DASHBOARD
+// ============================================================================
 
 const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWorkout, onLogout, onOpenSettings }) => {
     const todayStr = new Date().toISOString().split('T')[0];
     const [selectedDate, setSelectedDate] = useState(todayStr);
-
-    // Calendar view state
     const [viewDate, setViewDate] = useState(new Date());
     const [inputs, setInputs] = useState({});
+    const [activeTab, setActiveTab] = useState('workout');
+    const [showCalendar, setShowCalendar] = useState(false);
+    const [showSidebar, setShowSidebar] = useState(false);
+    const [restTimer, setRestTimer] = useState(null);
     const [foodLogInput, setFoodLogInput] = useState("");
     const [isSavingFoodLog, setIsSavingFoodLog] = useState(false);
-    const [isFuelLogOpen, setIsFuelLogOpen] = useState(false);
 
     const selDateObj = new Date(selectedDate);
     const dayOfWeek = selDateObj.getDay();
@@ -174,58 +444,27 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
     const isRestDay = !routine;
     const isSelectedToday = selectedDate === todayStr;
 
-    // Week calculation for highlighting
-    const startOfWeek = new Date(selDateObj);
-    startOfWeek.setDate(selDateObj.getDate() - selDateObj.getDay());
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    const selectedDayLog = dailyLogs.find(l => l.date === selectedDate) || { foodLog: "", workoutCompleted: false };
 
-    const isInSelectedWeek = (dateStr) => {
-        if (!dateStr) return false;
-        const d = new Date(dateStr);
-        return d >= startOfWeek && d <= endOfWeek;
-    };
+    useEffect(() => {
+        setFoodLogInput(selectedDayLog.foodLog || "");
+    }, [selectedDate, selectedDayLog.foodLog]);
 
-    // Calculate streak
-    const calculateStreak = () => {
+    const calculateStreak = useCallback(() => {
         let streak = 0;
-        const sortedLogs = [...dailyLogs].sort((a, b) => new Date(b.date) - new Date(a.date));
-        for (const log of sortedLogs) {
+        const sorted = [...dailyLogs].sort((a, b) => new Date(b.date) - new Date(a.date));
+        for (const log of sorted) {
             if (log.workoutCompleted) streak++;
             else break;
         }
         return streak;
-    };
-
-    // Daily log for selected date
-    const selectedDayLog = dailyLogs.find(l => l.date === selectedDate) || { foodLog: "", workoutCompleted: false };
-
-    // Sync food log input when selected date changes
-    React.useEffect(() => {
-        setFoodLogInput(selectedDayLog.foodLog || "");
-    }, [selectedDate, selectedDayLog.foodLog]);
-
-    const handlePrevMonth = () => {
-        setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1));
-    };
-
-    const handleNextMonth = () => {
-        setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1));
-    };
-
-    const handleDateClick = (dateStr) => {
-        setSelectedDate(dateStr);
-        setInputs({});
-    };
-
-    const handleInputChange = (id, val) => {
-        setInputs(prev => ({ ...prev, [id]: val }));
-    };
+    }, [dailyLogs]);
 
     const handleLog = (exercise) => {
         const val = inputs[exercise.id];
         if (!val) return;
         onLogWorkout(exercise.name, parseInt(val), exercise.weight || 0, selectedDate);
+        setInputs(prev => ({ ...prev, [exercise.id]: '' }));
     };
 
     const handleSaveFoodLog = async () => {
@@ -234,363 +473,255 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
         setIsSavingFoodLog(false);
     };
 
-    // Calendar generation
-    const getDaysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
-    const getFirstDayOfMonth = (year, month) => new Date(year, month, 1).getDay();
-
+    // Calendar
     const viewYear = viewDate.getFullYear();
     const viewMonth = viewDate.getMonth();
-    const daysInMonth = getDaysInMonth(viewYear, viewMonth);
-    const firstDay = getFirstDayOfMonth(viewYear, viewMonth);
+    const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+    const firstDay = new Date(viewYear, viewMonth, 1).getDay();
+    const calendarDays = [...Array(firstDay).fill(null), ...Array.from({ length: daysInMonth }, (_, i) => {
+        return `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(i + 1).padStart(2, '0')}`;
+    })];
 
-    const calendarDays = [];
-    for (let i = 0; i < firstDay; i++) calendarDays.push(null);
-    for (let d = 1; d <= daysInMonth; d++) {
-        const dateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-        calendarDays.push(dateStr);
-    }
-
-    // Count workouts this month
     const workoutsThisMonth = dailyLogs.filter(log => {
-        const logDate = new Date(log.date);
-        return logDate.getFullYear() === viewYear && logDate.getMonth() === viewMonth && log.workoutCompleted;
+        const d = new Date(log.date);
+        return d.getFullYear() === viewYear && d.getMonth() === viewMonth && log.workoutCompleted;
     }).length;
 
     return (
-        <div className="flex min-h-screen">
-            {/* Left Sidebar - Fixed/Persistent */}
-            <aside className="w-72 bg-white border-r border-slate-100 flex flex-col fixed left-0 top-0 h-screen z-50 shadow-sm">
-                <div className="flex flex-col h-full p-5">
-                    {/* Brand Header */}
-                    <div className="mb-6 pt-2">
-                        <h1 className="text-lg font-black tracking-tight text-slate-950 uppercase leading-tight">
-                            Personal<br />
-                            <span className="text-neon-green text-xl">Fitness Tracker</span>
-                        </h1>
-                        <p className="text-[9px] font-bold tracking-[0.2em] text-slate-400 mt-2 uppercase">Home Hypertrophy Guide</p>
-                    </div>
+        <div className="min-h-screen pb-20 md:pb-0">
+            {/* Rest Timer Modal */}
+            {restTimer && <RestTimer seconds={restTimer} onComplete={() => setRestTimer(null)} onCancel={() => setRestTimer(null)} />}
 
-                    {/* Streak Badge */}
-                    <div className="mb-6 p-4 bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl text-white">
-                        <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-full bg-neon-green flex items-center justify-center text-slate-950 font-black text-xl">
-                                {user.streak || calculateStreak()}
-                            </div>
-                            <div>
-                                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Current Streak</div>
-                                <div className="text-sm font-black uppercase tracking-wide">Days Active</div>
-                            </div>
+            {/* Mobile Header */}
+            <header className="md:hidden sticky top-0 z-40 bg-white/90 backdrop-blur-lg border-b border-slate-100 px-4 py-3">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h1 className="text-lg font-black text-slate-900">Fitness Tracker</h1>
+                        <p className="text-xs text-slate-500">{isSelectedToday ? "Today" : selDateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gradient-to-br from-slate-900 to-slate-700 rounded-full flex items-center justify-center text-neon-green font-black">
+                            {user.streak || calculateStreak()}
+                        </div>
+                        <button onClick={() => setShowSidebar(true)} className="p-2"><Menu size={24} /></button>
+                    </div>
+                </div>
+            </header>
+
+            {/* Desktop Sidebar */}
+            <aside className="hidden md:flex fixed left-0 top-0 h-screen w-72 bg-white border-r border-slate-100 flex-col p-5 z-50">
+                <div className="mb-6">
+                    <h1 className="text-xl font-black text-slate-900">Personal<br /><span className="text-neon-green">Fitness Tracker</span></h1>
+                    <p className="text-xs text-slate-400 mt-1 uppercase tracking-wider">3-Month Home Program</p>
+                </div>
+
+                {/* Streak */}
+                <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-4 mb-6 text-white">
+                    <div className="flex items-center gap-3">
+                        <div className="w-14 h-14 bg-neon-green rounded-full flex items-center justify-center text-slate-900 font-black text-2xl">
+                            {user.streak || calculateStreak()}
+                        </div>
+                        <div>
+                            <div className="text-xs text-slate-400 uppercase">Current Streak</div>
+                            <div className="font-bold">Days Active</div>
                         </div>
                     </div>
+                </div>
 
-                    {/* Hero Calendar */}
-                    <div className="flex-grow">
-                        <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
-                            <div className="flex justify-between items-center mb-4">
-                                <div>
-                                    <h3 className="text-sm font-black uppercase tracking-wide text-slate-950 flex items-center gap-2">
-                                        <Calendar size={16} className="text-neon-green" />
-                                        {fullMonthNames[viewMonth]}
-                                    </h3>
-                                    <p className="text-[10px] text-slate-400 font-bold mt-0.5">{viewYear} • {workoutsThisMonth} workouts</p>
-                                </div>
-                                <div className="flex gap-1">
-                                    <button onClick={handlePrevMonth} className="p-2 hover:bg-white rounded-lg text-slate-400 hover:text-slate-950 transition-all">
-                                        <ChevronLeft size={16} />
-                                    </button>
-                                    <button onClick={handleNextMonth} className="p-2 hover:bg-white rounded-lg text-slate-400 hover:text-slate-950 transition-all">
-                                        <ChevronRight size={16} />
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Day Headers */}
-                            <div className="grid grid-cols-7 gap-1 mb-2">
-                                {dayNames.map(d => (
-                                    <div key={d} className="text-[9px] font-black uppercase text-slate-400 text-center py-1">
-                                        {d[0]}
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* Calendar Grid */}
-                            <div className="grid grid-cols-7 gap-1">
-                                {calendarDays.map((dateStr, idx) => {
-                                    if (!dateStr) return <div key={`empty-${idx}`} className="aspect-square" />;
-
-                                    const isSelected = dateStr === selectedDate;
-                                    const isToday = dateStr === todayStr;
-                                    const isHighlightedWeek = isInSelectedWeek(dateStr);
-                                    const d = dateStr.split('-')[2];
-                                    const log = dailyLogs.find(l => l.date === dateStr);
-                                    const hasWorkout = log?.workoutCompleted;
-
-                                    return (
-                                        <button
-                                            key={dateStr}
-                                            onClick={() => handleDateClick(dateStr)}
-                                            className={`
-                                                aspect-square flex flex-col items-center justify-center transition-all relative rounded-lg text-xs font-bold
-                                                ${isSelected
-                                                    ? 'bg-slate-950 text-white ring-2 ring-neon-green ring-offset-1'
-                                                    : isToday
-                                                        ? 'bg-neon-green text-slate-950 font-black'
-                                                        : hasWorkout
-                                                            ? 'bg-neon-green/20 text-slate-900 hover:bg-neon-green/30'
-                                                            : isHighlightedWeek
-                                                                ? 'bg-white text-slate-700 hover:bg-slate-100'
-                                                                : 'bg-transparent text-slate-400 hover:bg-white'
-                                                }
-                                            `}
-                                        >
-                                            <span>{parseInt(d)}</span>
-                                            {hasWorkout && !isSelected && (
-                                                <div className="absolute bottom-0.5 w-1 h-1 rounded-full bg-neon-green" />
-                                            )}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-
-                            {/* Legend */}
-                            <div className="flex items-center gap-4 mt-4 pt-3 border-t border-slate-200">
-                                <div className="flex items-center gap-1.5 text-[9px] text-slate-400 font-bold">
-                                    <div className="w-2.5 h-2.5 rounded-full bg-neon-green"></div>
-                                    <span>Workout Done</span>
-                                </div>
-                                <div className="flex items-center gap-1.5 text-[9px] text-slate-400 font-bold">
-                                    <div className="w-2.5 h-2.5 rounded bg-slate-950"></div>
-                                    <span>Selected</span>
-                                </div>
-                            </div>
+                {/* Calendar */}
+                <div className="bg-slate-50 rounded-2xl p-4 mb-6 flex-grow overflow-auto">
+                    <div className="flex justify-between items-center mb-3">
+                        <h3 className="font-bold text-slate-900 flex items-center gap-2"><Calendar size={16} className="text-neon-green" />{fullMonthNames[viewMonth]}</h3>
+                        <div className="flex gap-1">
+                            <button onClick={() => setViewDate(new Date(viewYear, viewMonth - 1, 1))} className="p-1 hover:bg-white rounded"><ChevronLeft size={16} /></button>
+                            <button onClick={() => setViewDate(new Date(viewYear, viewMonth + 1, 1))} className="p-1 hover:bg-white rounded"><ChevronRight size={16} /></button>
                         </div>
                     </div>
-
-                    {/* Bottom Navigation */}
-                    <div className="mt-auto pt-4 border-t border-slate-100 space-y-2">
-                        <button
-                            onClick={onOpenSettings}
-                            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-50 text-slate-500 hover:text-slate-950 transition-all group"
-                        >
-                            <Settings size={18} className="group-hover:rotate-45 transition-transform duration-500" />
-                            <span className="text-xs font-bold uppercase tracking-wider">Settings</span>
-                        </button>
-
-                        <button
-                            onClick={onLogout}
-                            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-600 transition-all"
-                        >
-                            <LogOut size={18} />
-                            <span className="text-xs font-bold uppercase tracking-wider">Logout</span>
-                        </button>
+                    <div className="grid grid-cols-7 gap-1 text-center text-[9px] font-bold text-slate-400 mb-2">
+                        {dayNames.map(d => <div key={d}>{d[0]}</div>)}
                     </div>
+                    <div className="grid grid-cols-7 gap-1">
+                        {calendarDays.map((dateStr, idx) => {
+                            if (!dateStr) return <div key={`e-${idx}`} />;
+                            const isSelected = dateStr === selectedDate;
+                            const isToday = dateStr === todayStr;
+                            const hasWorkout = dailyLogs.find(l => l.date === dateStr)?.workoutCompleted;
+                            return (
+                                <button key={dateStr} onClick={() => setSelectedDate(dateStr)}
+                                    className={`aspect-square rounded-lg text-xs font-bold flex items-center justify-center transition-all
+                                        ${isSelected ? 'bg-slate-900 text-white' : isToday ? 'bg-neon-green text-slate-900' : hasWorkout ? 'bg-neon-green/20' : 'hover:bg-white'}`}>
+                                    {parseInt(dateStr.split('-')[2])}
+                                </button>
+                            );
+                        })}
+                    </div>
+                    <p className="text-xs text-slate-500 mt-3 text-center">{workoutsThisMonth} workouts this month</p>
+                </div>
+
+                {/* Nav */}
+                <div className="space-y-2 mt-auto">
+                    <button onClick={onOpenSettings} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-50 text-slate-500">
+                        <Settings size={18} /><span className="text-sm font-bold">Settings</span>
+                    </button>
+                    <button onClick={onLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-600">
+                        <LogOut size={18} /><span className="text-sm font-bold">Logout</span>
+                    </button>
                 </div>
             </aside>
 
-            {/* Main Content Area */}
-            <main className={`flex-1 ml-72 transition-all duration-500 ${isFuelLogOpen ? 'mr-[380px]' : ''}`}>
-                <div className="max-w-4xl mx-auto px-8 py-8">
-                    {/* Session Header */}
-                    <header className="mb-10 pb-6 border-b border-slate-100">
-                        <div className={`text-xs font-bold uppercase tracking-[0.2em] mb-2 ${isSelectedToday ? 'text-slate-400' : 'text-neon-green'}`}>
-                            {isSelectedToday ? 'Today\'s Session' : `Session: ${selDateObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`}
+            {/* Mobile Sidebar Overlay */}
+            {showSidebar && (
+                <div className="fixed inset-0 z-[100] md:hidden">
+                    <div className="absolute inset-0 bg-black/50" onClick={() => setShowSidebar(false)} />
+                    <div className="absolute right-0 top-0 h-full w-72 bg-white p-5 animate-slide-in-right">
+                        <button onClick={() => setShowSidebar(false)} className="absolute top-4 right-4"><X size={24} /></button>
+                        <h2 className="text-lg font-bold mb-6 mt-8">Menu</h2>
+                        <div className="space-y-3">
+                            <button onClick={() => { setShowCalendar(true); setShowSidebar(false); }} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-50">
+                                <Calendar size={18} /><span className="font-bold">Calendar</span>
+                            </button>
+                            <button onClick={onOpenSettings} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-50">
+                                <Settings size={18} /><span className="font-bold">Settings</span>
+                            </button>
+                            <button onClick={onLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-50 text-red-600">
+                                <LogOut size={18} /><span className="font-bold">Logout</span>
+                            </button>
                         </div>
-                        <h2 className="text-5xl font-black text-slate-950 tracking-tight uppercase leading-none mb-2">
-                            {isRestDay ? "Recovery Day" : routine.name}
+                    </div>
+                </div>
+            )}
+
+            {/* Mobile Calendar Modal */}
+            {showCalendar && (
+                <div className="fixed inset-0 z-[100] md:hidden flex items-end">
+                    <div className="absolute inset-0 bg-black/50" onClick={() => setShowCalendar(false)} />
+                    <div className="relative bg-white rounded-t-3xl w-full p-6 pb-10 animate-fade-in-up safe-bottom">
+                        <div className="w-12 h-1 bg-slate-300 rounded-full mx-auto mb-4" />
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="font-bold text-lg">{fullMonthNames[viewMonth]} {viewYear}</h3>
+                            <div className="flex gap-2">
+                                <button onClick={() => setViewDate(new Date(viewYear, viewMonth - 1, 1))} className="p-2 bg-slate-100 rounded-lg"><ChevronLeft size={18} /></button>
+                                <button onClick={() => setViewDate(new Date(viewYear, viewMonth + 1, 1))} className="p-2 bg-slate-100 rounded-lg"><ChevronRight size={18} /></button>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-7 gap-2 text-center text-xs font-bold text-slate-400 mb-2">
+                            {dayNames.map(d => <div key={d}>{d}</div>)}
+                        </div>
+                        <div className="grid grid-cols-7 gap-2">
+                            {calendarDays.map((dateStr, idx) => {
+                                if (!dateStr) return <div key={`e-${idx}`} />;
+                                const isSelected = dateStr === selectedDate;
+                                const isToday = dateStr === todayStr;
+                                const hasWorkout = dailyLogs.find(l => l.date === dateStr)?.workoutCompleted;
+                                return (
+                                    <button key={dateStr} onClick={() => { setSelectedDate(dateStr); setShowCalendar(false); }}
+                                        className={`aspect-square rounded-xl text-sm font-bold flex items-center justify-center
+                                            ${isSelected ? 'bg-slate-900 text-white' : isToday ? 'bg-neon-green text-slate-900' : hasWorkout ? 'bg-neon-green/20' : 'bg-slate-50'}`}>
+                                        {parseInt(dateStr.split('-')[2])}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Main Content */}
+            <main className="md:ml-72 px-4 md:px-8 py-6">
+                <div className="max-w-3xl mx-auto">
+                    {/* Session Header */}
+                    <header className="mb-8">
+                        <p className="text-sm text-neon-green font-bold uppercase tracking-wide mb-1">
+                            {isSelectedToday ? "Today's Workout" : selDateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                        </p>
+                        <h2 className="text-3xl md:text-4xl font-black text-slate-900 flex items-center gap-3">
+                            {isRestDay ? "🧘 Recovery Day" : `${routine.icon} ${routine.name}`}
                         </h2>
-                        {!isRestDay && (
-                            <p className="text-sm text-slate-400 font-bold uppercase tracking-wider">{routine.subtitle}</p>
-                        )}
+                        {!isRestDay && <p className="text-slate-500 font-medium mt-1">{routine.subtitle}</p>}
                     </header>
 
-                    {/* Training Section */}
-                    <section>
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="p-2 bg-slate-950 rounded-lg">
-                                <Dumbbell size={18} className="text-neon-green" />
-                            </div>
-                            <div>
-                                <h3 className="text-sm font-black uppercase tracking-wider text-slate-950">Structural Loading</h3>
-                                <p className="text-[10px] text-slate-400 font-bold uppercase">Progressive Overload Protocol</p>
-                            </div>
+                    {activeTab === 'workout' && (
+                        <>
+                            {isRestDay ? (
+                                <div className="glass-card p-8 md:p-12 text-center">
+                                    <Award size={64} className="mx-auto text-slate-300 mb-4" />
+                                    <h3 className="text-2xl font-bold text-slate-400 mb-2">Rest & Recover</h3>
+                                    <p className="text-slate-500 max-w-md mx-auto">Your muscles grow during rest! Focus on sleep, nutrition, and light stretching today.</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-6">
+                                    {/* Warmup */}
+                                    <div className="glass-card p-4">
+                                        <h4 className="text-xs font-black text-orange-600 uppercase mb-2 flex items-center gap-2"><Flame size={14} /> Warmup (2-3 min)</h4>
+                                        <ul className="text-sm text-slate-600 space-y-1">
+                                            {routine.warmup.map((w, i) => <li key={i}>• {w}</li>)}
+                                        </ul>
+                                    </div>
+
+                                    {/* Exercises */}
+                                    {routine.exercises.map((ex, idx) => {
+                                        const guide = EXERCISE_GUIDE[ex.name];
+                                        const history = workoutHistory[ex.name] || { lastReps: 0 };
+                                        return (
+                                            <div key={ex.id} className={`stagger-${idx + 1}`} style={{ opacity: 0, animationFillMode: 'forwards' }}>
+                                                <ExerciseCard
+                                                    exercise={ex}
+                                                    guide={guide}
+                                                    history={history}
+                                                    inputValue={inputs[ex.id] || ''}
+                                                    onInputChange={(val) => setInputs(prev => ({ ...prev, [ex.id]: val }))}
+                                                    onLog={() => handleLog(ex)}
+                                                    onStartRest={(secs) => setRestTimer(secs)}
+                                                />
+                                            </div>
+                                        );
+                                    })}
+
+                                    {/* Cooldown */}
+                                    <div className="glass-card p-4">
+                                        <h4 className="text-xs font-black text-blue-600 uppercase mb-2 flex items-center gap-2"><Award size={14} /> Cooldown Stretches</h4>
+                                        <ul className="text-sm text-slate-600 space-y-1">
+                                            {routine.cooldown.map((c, i) => <li key={i}>• {c}</li>)}
+                                        </ul>
+                                    </div>
+                                </div>
+                            )}
+                        </>
+                    )}
+
+                    {activeTab === 'nutrition' && (
+                        <div className="glass-card p-6">
+                            <h3 className="font-bold text-lg mb-4 flex items-center gap-2"><Flame className="text-orange-500" /> Nutrition Log</h3>
+                            <textarea
+                                value={foodLogInput}
+                                onChange={(e) => setFoodLogInput(e.target.value)}
+                                placeholder="Log your meals today... (aim for 1.6-2.2g protein per kg bodyweight)"
+                                className="w-full h-40 bg-slate-50 border-2 border-slate-100 rounded-xl p-4 text-slate-900 focus:outline-none focus:ring-2 focus:ring-neon-green/30 focus:border-neon-green resize-none"
+                            />
+                            <button onClick={handleSaveFoodLog} disabled={isSavingFoodLog}
+                                className={`w-full mt-4 py-3 rounded-xl font-bold transition-all ${isSavingFoodLog ? 'bg-slate-200 text-slate-400' : 'bg-slate-900 text-white hover:bg-neon-green hover:text-slate-900'}`}>
+                                {isSavingFoodLog ? 'Saving...' : 'Save Log'}
+                            </button>
                         </div>
-
-                        {isRestDay ? (
-                            <div className="bg-gradient-to-br from-slate-50 to-white rounded-3xl p-16 border border-slate-100 text-center">
-                                <Award size={56} className="mx-auto text-slate-200 mb-6" />
-                                <h4 className="text-2xl font-black text-slate-400 mb-3 uppercase tracking-tight">Growth Happens in Rest</h4>
-                                <p className="text-slate-400 text-sm font-medium max-w-md mx-auto">
-                                    Your muscles are rebuilding. Focus on nutrition, sleep, and light mobility today.
-                                </p>
-                            </div>
-                        ) : (
-                            <div className="space-y-6">
-                                {routine.exercises.map((ex) => {
-                                    const history = workoutHistory[ex.name] || { lastReps: 0, lastWeight: 0 };
-                                    const guide = EXERCISE_GUIDE[ex.name];
-
-                                    return (
-                                        <div key={ex.id} className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
-                                            {/* Exercise Header */}
-                                            <div className="p-6 pb-0">
-                                                <div className="flex justify-between items-start mb-4">
-                                                    <div>
-                                                        <h3 className="text-xl font-black text-slate-950 uppercase tracking-tight mb-2">{ex.name}</h3>
-                                                        <div className="flex items-center gap-3 flex-wrap">
-                                                            <span className="text-neon-green text-[11px] font-black uppercase tracking-wide bg-neon-green/10 px-2.5 py-1 rounded-full">
-                                                                {ex.target}
-                                                            </span>
-                                                            {ex.tempo && (
-                                                                <span className="text-slate-500 text-[10px] font-bold uppercase tracking-wide bg-slate-100 px-2.5 py-1 rounded-full flex items-center gap-1">
-                                                                    <Zap size={10} />
-                                                                    Tempo: {ex.tempo}
-                                                                </span>
-                                                            )}
-                                                            <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">{ex.type} Load</span>
-                                                        </div>
-                                                    </div>
-                                                    {/* Previous Best */}
-                                                    <div className="bg-slate-50 px-4 py-2.5 rounded-xl border border-slate-100 flex items-center gap-3">
-                                                        <History size={14} className="text-slate-300" />
-                                                        <div className="text-right">
-                                                            <div className="text-[9px] font-bold text-slate-400 uppercase leading-none mb-0.5">Last Session</div>
-                                                            <div className="text-sm font-black text-slate-950">
-                                                                {history.lastReps} <span className="text-slate-400 text-[9px]">reps</span>
-                                                                {history.lastWeight > 0 ? ` @ ${history.lastWeight}kg` : ''}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Exercise Guide */}
-                                            {guide && (
-                                                <div className="mx-6 mb-4 p-4 bg-slate-50 rounded-xl border-l-4 border-slate-900">
-                                                    <div className="flex items-center gap-2 mb-3">
-                                                        <Info size={12} className="text-slate-500" />
-                                                        <span className="text-[9px] font-black uppercase tracking-wider text-slate-500">Exercise Guide</span>
-                                                    </div>
-
-                                                    <p className="text-slate-700 text-sm font-medium mb-3">{guide.instruction}</p>
-
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-3 border-t border-slate-200">
-                                                        {/* How to Progress */}
-                                                        <div className="flex items-start gap-2">
-                                                            <div className="p-1 bg-neon-green/20 rounded">
-                                                                <TrendingUp size={10} className="text-neon-green" />
-                                                            </div>
-                                                            <div>
-                                                                <div className="text-[9px] font-black uppercase text-neon-green tracking-wide mb-0.5">How to Progress</div>
-                                                                <p className="text-[11px] text-slate-600 font-medium leading-relaxed">{guide.progress}</p>
-                                                            </div>
-                                                        </div>
-
-                                                        {/* Mind-Muscle Connection */}
-                                                        <div className="flex items-start gap-2">
-                                                            <div className="p-1 bg-purple-100 rounded">
-                                                                <Target size={10} className="text-purple-600" />
-                                                            </div>
-                                                            <div>
-                                                                <div className="text-[9px] font-black uppercase text-purple-600 tracking-wide mb-0.5">Mind-Muscle Cue</div>
-                                                                <p className="text-[11px] text-slate-600 font-medium leading-relaxed">{guide.feel}</p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {/* Input Section */}
-                                            <div className="p-6 pt-2 flex gap-3">
-                                                <div className="flex-1">
-                                                    <input
-                                                        type="number"
-                                                        placeholder="Enter reps completed"
-                                                        value={inputs[ex.id] || ''}
-                                                        onChange={(e) => handleInputChange(ex.id, e.target.value)}
-                                                        className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl py-4 px-5 text-slate-950 font-bold text-base focus:outline-none focus:ring-2 focus:ring-neon-green/30 focus:border-neon-green transition-all placeholder:text-slate-300"
-                                                    />
-                                                </div>
-                                                <button
-                                                    onClick={() => handleLog(ex)}
-                                                    className="px-6 bg-slate-950 text-white flex items-center justify-center rounded-xl hover:bg-neon-green hover:text-black transition-all shadow-lg active:scale-95 group"
-                                                >
-                                                    <CheckCircle2 size={24} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        )}
-                    </section>
+                    )}
                 </div>
             </main>
 
-            {/* Collapsible Fuel Log Drawer (Far Right) */}
-            <div
-                className={`fixed top-0 right-0 h-full bg-white border-l border-slate-100 shadow-2xl transition-all duration-500 z-[100] ${isFuelLogOpen ? 'w-full lg:w-[380px]' : 'w-0'}`}
-            >
-                {/* Drawer Tab / Toggle */}
-                <button
-                    onClick={() => setIsFuelLogOpen(!isFuelLogOpen)}
-                    className="absolute top-1/2 -left-12 -translate-y-1/2 bg-slate-950 text-white p-4 rounded-l-2xl shadow-xl hover:bg-neon-green hover:text-black transition-all flex flex-col items-center gap-2 uppercase text-[9px] font-black vertical-text group"
-                >
-                    {isFuelLogOpen ? <ChevronRightIcon size={16} /> : <ChevronLeftIcon size={16} />}
-                    <span className="tracking-widest py-2">Nutrition Log</span>
-                    <Flame size={12} className={isFuelLogOpen ? 'text-neon-green' : 'text-orange-500 group-hover:animate-pulse'} />
+            {/* Mobile Bottom Nav */}
+            <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 flex justify-around py-2 safe-bottom z-40">
+                <button onClick={() => setActiveTab('workout')} className={`flex flex-col items-center p-2 ${activeTab === 'workout' ? 'text-neon-green' : 'text-slate-400'}`}>
+                    <Dumbbell size={22} /><span className="text-[10px] font-bold mt-1">Workout</span>
                 </button>
-
-                {/* Drawer Content */}
-                {isFuelLogOpen && (
-                    <div className="p-8 h-full flex flex-col animate-in slide-in-from-right duration-500">
-                        <div className="flex items-center justify-between mb-8">
-                            <div className="flex items-center gap-3">
-                                <MessageSquare size={20} className="text-slate-950" />
-                                <h3 className="text-sm font-black uppercase tracking-wider text-slate-950">Nutrition Log</h3>
-                            </div>
-                            <button onClick={() => setIsFuelLogOpen(false)} className="text-slate-300 hover:text-slate-950 transition-colors">
-                                <X size={24} />
-                            </button>
-                        </div>
-
-                        <div className="flex-grow flex flex-col gap-6">
-                            <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 flex-grow flex flex-col">
-                                <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 block">Daily Food Intake</div>
-                                <textarea
-                                    placeholder="Log your meals, protein intake, supplements..."
-                                    value={foodLogInput}
-                                    onChange={(e) => setFoodLogInput(e.target.value)}
-                                    className="w-full bg-white border-2 border-slate-100 rounded-xl p-4 text-slate-950 text-sm focus:outline-none focus:ring-2 focus:ring-neon-green/20 focus:border-neon-green transition-all flex-grow resize-none mb-4 leading-relaxed font-medium placeholder:text-slate-300"
-                                />
-                                <button
-                                    onClick={handleSaveFoodLog}
-                                    disabled={isSavingFoodLog}
-                                    className={`w-full py-4 rounded-xl font-bold text-xs uppercase tracking-wider transition-all active:scale-[0.98] ${isSavingFoodLog
-                                        ? 'bg-slate-100 text-slate-300'
-                                        : 'bg-slate-950 text-white hover:bg-neon-green hover:text-slate-950'
-                                        }`}
-                                >
-                                    {isSavingFoodLog ? 'Saving...' : 'Save Log'}
-                                </button>
-                            </div>
-
-                            <div className="px-4 text-slate-400 text-xs font-medium leading-relaxed border-l-2 border-slate-200 py-2">
-                                <span className="font-bold text-slate-600">Tip:</span> For hypertrophy, aim for 1.6-2.2g protein per kg bodyweight daily.
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </div>
-
-            {/* CSS for Vertical Text */}
-            <style dangerouslySetInnerHTML={{
-                __html: `
-                .vertical-text {
-                    writing-mode: vertical-rl;
-                    text-orientation: mixed;
-                    transform: rotate(180deg);
-                }
-            `}} />
+                <button onClick={() => setShowCalendar(true)} className="flex flex-col items-center p-2 text-slate-400">
+                    <Calendar size={22} /><span className="text-[10px] font-bold mt-1">Calendar</span>
+                </button>
+                <button onClick={() => setActiveTab('nutrition')} className={`flex flex-col items-center p-2 ${activeTab === 'nutrition' ? 'text-neon-green' : 'text-slate-400'}`}>
+                    <Flame size={22} /><span className="text-[10px] font-bold mt-1">Nutrition</span>
+                </button>
+                <button onClick={() => setShowSidebar(true)} className="flex flex-col items-center p-2 text-slate-400">
+                    <Settings size={22} /><span className="text-[10px] font-bold mt-1">More</span>
+                </button>
+            </nav>
         </div>
     );
 };
