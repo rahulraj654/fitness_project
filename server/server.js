@@ -209,10 +209,24 @@ app.post('/api/log-workout', (req, res) => {
     // Mark today's workout as completed
     let log = data.dailyLogs.find(l => l.date === date);
     if (!log) {
-        log = { date, calories: 0, protein: 0, workoutCompleted: true };
+        log = {
+            date,
+            calories: 0,
+            protein: 0,
+            workoutCompleted: true,
+            exercises: [exercise]
+        };
         data.dailyLogs.push(log);
     } else {
         log.workoutCompleted = true;
+
+        // Add to exercises list if not present
+        if (!log.exercises) log.exercises = [];
+        // Determine ID or Name?? The frontend sends 'exercise.name' usually.
+        // Let's rely on the string sent.
+        if (!log.exercises.includes(exercise)) {
+            log.exercises.push(exercise);
+        }
     }
 
     // Increment streak if not already counted today
@@ -220,7 +234,7 @@ app.post('/api/log-workout', (req, res) => {
     // For now, let's just keep it simple as a total count or manual)
 
     saveData(data);
-    res.json({ success: true, workoutHistory: data.workoutHistory });
+    res.json({ success: true, workoutHistory: data.workoutHistory, dailyLog: log });
 });
 
 // Deprecated routes (for compatibility if needed)

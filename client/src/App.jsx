@@ -46,10 +46,12 @@ const App = () => {
 
         let todayLog = newData.dailyLogs.find(log => log.date === date);
         if (!todayLog) {
-            todayLog = { date: date, foodLog: "", workoutCompleted: true };
+            todayLog = { date: date, foodLog: "", workoutCompleted: true, exercises: [exercise] };
             newData.dailyLogs.push(todayLog);
         } else {
             todayLog.workoutCompleted = true;
+            if (!todayLog.exercises) todayLog.exercises = [];
+            if (!todayLog.exercises.includes(exercise)) todayLog.exercises.push(exercise);
         }
 
         setData(newData);
