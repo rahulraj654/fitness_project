@@ -5,11 +5,10 @@ const bodyParser = require('body-parser');
 const csrf = require('csurf');
 const morgan = require('morgan');
 const path = require('path');
-const fs = require('fs');
+const db = require('./database');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-const DATA_PATH = path.join(__dirname, 'data.json');
 
 // --- Middlewares ---
 app.use(morgan('dev'));
@@ -112,141 +111,151 @@ app.get('/api/user', (req, res) => {
     res.json({ user: req.session.user });
 });
 
-// Helper to read data (Titan Gainz Structure)
-const readData = () => {
+
+// --- NEW TITAN GAINZ API (SQLite) ---
+
+app.get('/api/data', async (req, res) => {
     try {
-        if (!fs.existsSync(DATA_PATH)) {
-            const initialData = {
-                user: { weight: 67, streak: 0, startDate: new Date().toISOString().split('T')[0] },
-                dailyLogs: [],
-                workoutHistory: {}
+        // Fetch all daily logs
+        const dailyLogs = await db.all("SELECT * FROM daily_logs");
+
+        // Fetch all workout sets
+        const workoutSets = await db.all("SELECT * FROM workout_sets ORDER BY created_at ASC");
+
+        // Construct the response structure expected by frontend
+        // We need to attach 'sets' to each dailyLog or the frontend needs to parse it.
+        // Let's modify the frontend to accept 'sets' as a flat list or nested.
+        // For backwards compatibility/simplicity, let's nest them in the relevant dailyLog if possible, 
+        // OR just send them back and let the frontend map them. 
+        // Better: let's conform to the existing structure BUT add a `sets` array to each daily log.
+
+        // 1. Process Logs
+        const logsMap = {};
+        dailyLogs.forEach(log => {
+            logsMap[log.date] = {
+                date: log.date,
+                calories: log.calories,
+                protein: log.protein,
+                foodLog: log.food_log,
+                workoutCompleted: false, // will calculate below
+                exercises: [],
+                sets: []
             };
-            fs.writeFileSync(DATA_PATH, JSON.stringify(initialData, null, 2));
-            return initialData;
-        }
-        const data = fs.readFileSync(DATA_PATH, 'utf8');
-        let parsed = JSON.parse(data);
+        });
 
-        // Migration/Migration logic if it's the old structure
-        if (parsed.stats || parsed.activities) {
-            parsed = {
-                user: { weight: 67, streak: parsed.stats ? parsed.stats.streak : 0, startDate: new Date().toISOString().split('T')[0] },
-                dailyLogs: [],
-                workoutHistory: {}
-            };
-            saveData(parsed);
-        }
+        // 2. Process Sets
+        const workoutHistory = {}; // { ExerciseName: { lastReps, lastWeight } }
 
-        // Migration: Add foodLog to existing dailyLogs if missing
-        parsed.dailyLogs = (parsed.dailyLogs || []).map(log => ({
-            ...log,
-            foodLog: log.foodLog || ""
-        }));
+        workoutSets.forEach(set => {
+            // Update History
+            workoutHistory[set.exercise_name] = { lastReps: set.reps, lastWeight: set.weight };
 
-        return parsed;
+            // Ensure log exists for this date (if set exists but no daily_log entry yet - rare but possible if logic changes)
+            if (!logsMap[set.date]) {
+                logsMap[set.date] = {
+                    date: set.date,
+                    calories: 0,
+                    protein: 0,
+                    foodLog: "",
+                    workoutCompleted: false,
+                    exercises: [],
+                    sets: []
+                };
+            }
+
+            const log = logsMap[set.date];
+            log.sets.push(set);
+
+            // Mark exercise as present
+            if (!log.exercises.includes(set.exercise_name)) {
+                log.exercises.push(set.exercise_name);
+            }
+            log.workoutCompleted = true; // If there are sets, it's completed (or at least started)
+        });
+
+        const finalLogs = Object.values(logsMap);
+
+        res.json({
+            user: { weight: 67, streak: 0, startDate: new Date().toISOString().split('T')[0] }, // Mock user stats for now
+            dailyLogs: finalLogs,
+            workoutHistory: workoutHistory
+        });
+
     } catch (err) {
-        console.error('Error reading data:', err);
-        return { user: { weight: 67, streak: 0, startDate: new Date().toISOString().split('T')[0] }, dailyLogs: [], workoutHistory: {} };
+        console.error(err);
+        res.status(500).json({ error: "Database error" });
     }
-};
-
-// Helper to save data
-const saveData = (data) => {
-    try {
-        fs.writeFileSync(DATA_PATH, JSON.stringify(data, null, 2));
-    } catch (err) {
-        console.error('Error saving data:', err);
-    }
-};
-
-// --- NEW TITAN GAINZ API ---
-
-app.get('/api/data', (req, res) => {
-    const data = readData();
-    res.json(data);
 });
 
-app.post('/api/update-food-log', (req, res) => {
+app.post('/api/update-food-log', async (req, res) => {
     const { foodLog, date } = req.body;
-    const data = readData();
-
-    let log = data.dailyLogs.find(l => l.date === date);
-    if (!log) {
-        log = { date, calories: 0, protein: 0, foodLog: "", workoutCompleted: false };
-        data.dailyLogs.push(log);
-    }
-
-    log.foodLog = foodLog;
-
-    saveData(data);
-    res.json({ success: true, log });
-});
-
-app.post('/api/update-nutrition', (req, res) => {
-    const { calories, protein, date } = req.body;
-    const data = readData();
-
-    let log = data.dailyLogs.find(l => l.date === date);
-    if (!log) {
-        log = { date, calories: 0, protein: 0, foodLog: "", workoutCompleted: false };
-        data.dailyLogs.push(log);
-    }
-
-    log.calories = calories;
-    log.protein = protein;
-
-    saveData(data);
-    res.json({ success: true, log });
-});
-
-app.post('/api/log-workout', (req, res) => {
-    const { exercise, reps, weight, date } = req.body;
-    const data = readData();
-
-    // Update workout history
-    data.workoutHistory[exercise] = { lastReps: reps, lastWeight: weight };
-
-    // Mark today's workout as completed
-    let log = data.dailyLogs.find(l => l.date === date);
-    if (!log) {
-        log = {
-            date,
-            calories: 0,
-            protein: 0,
-            workoutCompleted: true,
-            exercises: [exercise]
-        };
-        data.dailyLogs.push(log);
-    } else {
-        log.workoutCompleted = true;
-
-        // Add to exercises list if not present
-        if (!log.exercises) log.exercises = [];
-        // Determine ID or Name?? The frontend sends 'exercise.name' usually.
-        // Let's rely on the string sent.
-        if (!log.exercises.includes(exercise)) {
-            log.exercises.push(exercise);
+    try {
+        // Upsert logic
+        const existing = await db.get("SELECT * FROM daily_logs WHERE date = ?", [date]);
+        if (existing) {
+            await db.run("UPDATE daily_logs SET food_log = ? WHERE date = ?", [foodLog, date]);
+        } else {
+            await db.run("INSERT INTO daily_logs (date, food_log) VALUES (?, ?)", [date, foodLog]);
         }
+        res.json({ success: true });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Database error" });
     }
-
-    // Increment streak if not already counted today
-    // (Simplistic logic: if no workout was completed yesterday, streak resets? 
-    // For now, let's just keep it simple as a total count or manual)
-
-    saveData(data);
-    res.json({ success: true, workoutHistory: data.workoutHistory, dailyLog: log });
 });
 
-// Deprecated routes (for compatibility if needed)
-app.get('/api/stats', (req, res) => {
-    const data = readData();
-    res.json(data.user);
+app.post('/api/update-nutrition', async (req, res) => {
+    const { calories, protein, date } = req.body;
+    try {
+        const existing = await db.get("SELECT * FROM daily_logs WHERE date = ?", [date]);
+        if (existing) {
+            await db.run("UPDATE daily_logs SET calories = ?, protein = ? WHERE date = ?", [calories, protein, date]);
+        } else {
+            await db.run("INSERT INTO daily_logs (date, calories, protein) VALUES (?, ?, ?)", [date, calories, protein]);
+        }
+        res.json({ success: true });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Database error" });
+    }
+});
+
+app.post('/api/log-workout', async (req, res) => {
+    const { exercise, reps, weight, date } = req.body;
+    try {
+        // Insert set
+        const result = await db.run(
+            "INSERT INTO workout_sets (date, exercise_name, reps, weight) VALUES (?, ?, ?, ?)",
+            [date, exercise, reps, weight]
+        );
+
+        // Also ensure a daily_log entry exists so the day shows up in the list
+        const existing = await db.get("SELECT * FROM daily_logs WHERE date = ?", [date]);
+        if (!existing) {
+            await db.run("INSERT INTO daily_logs (date) VALUES (?)", [date]);
+        }
+
+        res.json({ success: true, id: result.id });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Database error" });
+    }
+});
+
+app.delete('/api/sets/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        await db.run("DELETE FROM workout_sets WHERE id = ?", [id]);
+        res.json({ success: true });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Database error" });
+    }
 });
 
 // Start Server
-// Binding to '127.0.0.1' ensures the server is ONLY accessible locally (or via SSH tunnel)
-// and NOT exposed to the public internet directly.
 app.listen(PORT, '127.0.0.1', () => {
     console.log(`Server running on http://127.0.0.1:${PORT}`);
     console.log(`To access via SSH tunnel, use: ssh -L ${PORT}:127.0.0.1:${PORT} user@host`);
 });
+

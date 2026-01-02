@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getUserData, updateFoodLog, logWorkout, updateUser, logout } from './api/api';
+import { getUserData, updateFoodLog, logWorkout, deleteSet, updateUser, logout } from './api/api';
 import Dashboard from './components/Dashboard';
 import SettingsModal from './components/SettingsModal';
 
@@ -12,7 +12,12 @@ const App = () => {
         const fetchData = async () => {
             const res = await getUserData();
             if (res) {
-                setData(res);
+                // Ensure sets array exists if backend didn't send it (migration/safety)
+                const safeLogs = (res.dailyLogs || []).map(log => ({
+                    ...log,
+                    sets: log.sets || []
+                }));
+                setData({ ...res, dailyLogs: safeLogs });
             }
             setLoading(false);
         };
@@ -27,7 +32,7 @@ const App = () => {
         let todayLog = newData.dailyLogs.find(log => log.date === date);
 
         if (!todayLog) {
-            todayLog = { date: date, foodLog: "", workoutCompleted: false };
+            todayLog = { date: date, foodLog: "", workoutCompleted: false, sets: [], exercises: [] };
             newData.dailyLogs.push(todayLog);
         }
 
@@ -40,22 +45,63 @@ const App = () => {
     const handleLogWorkout = async (exercise, reps, weight, date) => {
         if (!data) return;
 
+        // 1. Call API first to get the ID (slightly less optimistic but ensures ID consistency for deletion)
+        // Or we can generate a temp ID, but let's wait for simplicity unless it's slow.
+        const res = await logWorkout(exercise, reps, weight, date);
+
+        if (res && res.success) {
+            const newData = { ...data };
+            newData.workoutHistory[exercise] = { lastReps: reps, lastWeight: weight };
+
+            let todayLog = newData.dailyLogs.find(log => log.date === date);
+            if (!todayLog) {
+                todayLog = { date: date, foodLog: "", workoutCompleted: true, exercises: [exercise], sets: [] };
+                newData.dailyLogs.push(todayLog);
+            } else {
+                todayLog.workoutCompleted = true;
+                if (!todayLog.exercises) todayLog.exercises = [];
+                if (!todayLog.exercises.includes(exercise)) todayLog.exercises.push(exercise);
+                if (!todayLog.sets) todayLog.sets = [];
+            }
+
+            // Add the new set
+            todayLog.sets.push({
+                id: res.id,
+                date: date,
+                exercise_name: exercise,
+                reps: reps,
+                weight: weight,
+                created_at: new Date().toISOString()
+            });
+
+            setData(newData);
+        }
+    };
+
+    const handleDeleteSet = async (setId, date) => {
+        if (!data) return;
+
         // Optimistic Update
         const newData = { ...data };
-        newData.workoutHistory[exercise] = { lastReps: reps, lastWeight: weight };
+        const todayLog = newData.dailyLogs.find(log => log.date === date);
 
-        let todayLog = newData.dailyLogs.find(log => log.date === date);
-        if (!todayLog) {
-            todayLog = { date: date, foodLog: "", workoutCompleted: true, exercises: [exercise] };
-            newData.dailyLogs.push(todayLog);
-        } else {
-            todayLog.workoutCompleted = true;
-            if (!todayLog.exercises) todayLog.exercises = [];
-            if (!todayLog.exercises.includes(exercise)) todayLog.exercises.push(exercise);
+        if (todayLog && todayLog.sets) {
+            todayLog.sets = todayLog.sets.filter(s => s.id !== setId);
+
+            // Recalculate completion status if needed
+            // If sets are empty, is workout still "completed"? 
+            // Maybe yes if they just deleted everything but still "worked out"? 
+            // For now, let's keep it 'true' if the log exists, or strict check:
+            if (todayLog.sets.length === 0) {
+                todayLog.workoutCompleted = false;
+                // Also remove exercise from list if no sets remain for it?
+                // That might be complex if we don't know which exercise key to remove easily.
+                // Let's leave `exercises` list as is for now, it's just a summary.
+            }
         }
 
         setData(newData);
-        await logWorkout(exercise, reps, weight, date);
+        await deleteSet(setId);
     };
 
     const handleLogout = async () => {
@@ -99,6 +145,7 @@ const App = () => {
                     dailyLogs={data.dailyLogs}
                     onUpdateFoodLog={handleUpdateFoodLog}
                     onLogWorkout={handleLogWorkout}
+                    onDeleteSet={handleDeleteSet}
                     onLogout={handleLogout}
                     onOpenSettings={() => setShowSettings(true)}
                 />

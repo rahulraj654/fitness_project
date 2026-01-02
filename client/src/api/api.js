@@ -150,6 +150,28 @@ export const logWorkout = async (exercise, reps, weight, date) => {
     }
 };
 
+export const deleteSet = async (setId) => {
+    try {
+        const response = await fetch(`${BASE_URL}/sets/${setId}`, {
+            method: 'DELETE',
+            headers: {
+                'X-XSRF-Token': getCsrfToken()
+            }
+        });
+
+        if (response.status === 401 || (response.url && response.url.includes('login.html'))) {
+            window.location.href = '/login.html';
+            return null;
+        }
+
+        if (!response.ok) throw new Error('Delete failed');
+        return await response.json();
+    } catch (error) {
+        console.error("Delete set failed:", error);
+        return { success: false, error: error.message };
+    }
+};
+
 export const updateUser = async (userData) => {
     try {
         const response = await fetch(`${BASE_URL}/update-user`, {

@@ -271,7 +271,7 @@ const DailyBriefing = ({ routineName, briefing, onOpenGlossary }) => {
     );
 };
 
-const ExerciseCard = ({ exercise, guide, history, onLog, inputValue, onInputChange, onStartRest, isCompleted, onOpenGlossary }) => {
+const ExerciseCard = ({ exercise, guide, history, sets, onLog, onDeleteSet, inputValue, onInputChange, onStartRest, isCompleted, onOpenGlossary }) => {
     const [expanded, setExpanded] = useState(false);
 
     return (
@@ -368,7 +368,7 @@ const ExerciseCard = ({ exercise, guide, history, onLog, inputValue, onInputChan
                 />
                 <button onClick={onLog} className={`px-6 rounded-xl font-bold transition-all active:scale-95 touch-target flex items-center gap-2 shadow-lg shadow-neon-green/20
                     ${isCompleted ? 'bg-neon-green text-slate-900 hover:bg-slate-900 hover:text-white' : 'bg-slate-900 text-white hover:bg-neon-green hover:text-slate-900'}`}>
-                    <CheckCircle2 size={24} /> {isCompleted ? "Done" : "Log Set"}
+                    <CheckCircle2 size={24} /> {isCompleted ? "Log Another" : "Log Set"}
                 </button>
                 {exercise.rest && (
                     <button onClick={() => onStartRest(exercise.rest)} className="px-4 bg-slate-100 text-slate-500 rounded-xl hover:bg-blue-100 hover:text-blue-600 transition-all touch-target">
@@ -376,6 +376,25 @@ const ExerciseCard = ({ exercise, guide, history, onLog, inputValue, onInputChan
                     </button>
                 )}
             </div>
+
+            {/* Sets List */}
+            {sets && sets.length > 0 && (
+                <div className="px-4 md:px-6 pb-6 space-y-2">
+                    <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Logged Sets</div>
+                    {sets.map((set, i) => (
+                        <div key={set.id || i} className="flex justify-between items-center bg-white border border-slate-100 rounded-xl p-3 shadow-sm">
+                            <div className="flex items-center gap-3">
+                                <span className="w-6 h-6 bg-slate-100 rounded-full flex items-center justify-center text-xs font-bold text-slate-500">{i + 1}</span>
+                                <span className="font-bold text-slate-900">{set.reps} reps</span>
+                                {set.weight > 0 && <span className="text-sm text-slate-500">@ {set.weight}kg</span>}
+                            </div>
+                            <button onClick={() => onDeleteSet(set.id)} className="text-slate-400 hover:text-red-500 p-2 transition-colors">
+                                <X size={16} />
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 };
@@ -384,7 +403,7 @@ const ExerciseCard = ({ exercise, guide, history, onLog, inputValue, onInputChan
 // MAIN DASHBOARD
 // ============================================================================
 
-const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWorkout, onLogout, onOpenSettings }) => {
+const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWorkout, onDeleteSet, onLogout, onOpenSettings }) => {
     const todayStr = new Date().toISOString().split('T')[0];
     const [selectedDate, setSelectedDate] = useState(todayStr);
     const [viewDate, setViewDate] = useState(new Date());
@@ -403,8 +422,9 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
     const isRestDay = !routine;
     const isSelectedToday = selectedDate === todayStr;
 
-    const selectedDayLog = dailyLogs.find(l => l.date === selectedDate) || { foodLog: "", workoutCompleted: false, exercises: [] };
+    const selectedDayLog = dailyLogs.find(l => l.date === selectedDate) || { foodLog: "", workoutCompleted: false, exercises: [], sets: [] };
     const completedExercises = selectedDayLog.exercises || [];
+    const daySets = selectedDayLog.sets || [];
 
     useEffect(() => {
         setFoodLogInput(selectedDayLog.foodLog || "");
@@ -452,7 +472,7 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
 
         if (!dayRoutine) return 'rest';
         if (isFuture) return 'future';
-        if (log?.workoutCompleted) return 'complete';
+        if (log?.workoutCompleted) return 'complete'; // Backend/App.jsx logic sets this if sets exist
         if (isToday) return 'pending';
         return 'missed';
     };
@@ -604,6 +624,7 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
                                     const guide = EXERCISE_GUIDE[ex.name];
                                     const history = workoutHistory[ex.name] || { lastReps: 0 };
                                     const isCompleted = completedExercises.includes(ex.name);
+                                    const exerciseSets = daySets.filter(s => s.exercise_name === ex.name);
 
                                     return (
                                         <div key={ex.id} className={`stagger-${idx + 1}`} style={{ animationFillMode: 'forwards' }}>
@@ -612,9 +633,11 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
                                                 guide={guide}
                                                 history={history}
                                                 isCompleted={isCompleted}
+                                                sets={exerciseSets}
                                                 inputValue={inputs[ex.id] || ''}
                                                 onInputChange={(val) => setInputs(prev => ({ ...prev, [ex.id]: val }))}
                                                 onLog={() => handleLog(ex)}
+                                                onDeleteSet={(setId) => onDeleteSet(setId, selectedDate)}
                                                 onStartRest={(secs) => setRestTimer(secs)}
                                                 onOpenGlossary={() => setShowGlossary(true)}
                                             />
