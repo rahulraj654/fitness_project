@@ -222,6 +222,21 @@ app.post('/api/update-nutrition', async (req, res) => {
 
 app.post('/api/log-workout', async (req, res) => {
     const { exercise, reps, weight, date } = req.body;
+
+    // Validate date is within last 7 days
+    const logDate = new Date(date);
+    logDate.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const sevenDaysAgo = new Date(today);
+    sevenDaysAgo.setDate(today.getDate() - 7);
+
+    if (logDate < sevenDaysAgo || logDate > today) {
+        return res.status(400).json({
+            error: 'Cannot log workouts for dates older than 7 days or in the future'
+        });
+    }
+
     try {
         // Insert set
         const result = await db.run(

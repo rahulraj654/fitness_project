@@ -267,7 +267,11 @@ const routines = {
             { name: "Shoulder Shrugs", target: "10 reps" },
             { name: "Wall Slides", target: "10 reps" }
         ],
-        exercises: [{ id: "incline_pushups", name: "Incline Pushups", target: "3 x 10-12", sets: 3, reps: "10-12", type: "BW", tempo: "2-1-2", rest: 60 }, { id: "db_overhead_press", name: "DB Overhead Press", target: "3 x 12-15", sets: 3, reps: "12-15", type: "DB", weight: 2, tempo: "2-1-2", rest: 60 }, { id: "db_lateral_raises", name: "DB Lateral Raises", target: "3 x 12-15", sets: 3, reps: "12-15", type: "DB", weight: 2, tempo: "2-1-3", rest: 45 }],
+        exercises: [
+            { id: "pushup_progression", name: "Push-up Progression", target: "4 x 8-12", sets: 4, reps: "8-12", type: "BW", tempo: "3-1-2", rest: 90, note: "Incline → Knee → Full → Decline as you progress" },
+            { id: "db_overhead_press", name: "DB Overhead Press", target: "4 x 8-10", sets: 4, reps: "8-10", type: "DB", weight: 2, tempo: "3-1-2", rest: 90 },
+            { id: "db_lateral_raises", name: "DB Lateral Raises", target: "3 x 12-15", sets: 3, reps: "12-15", type: "DB", weight: 2, tempo: "2-1-3", rest: 60 }
+        ],
         cooldown: [
             { name: "Chest Stretch", target: "30s/side" },
             { name: "Shoulder Stretch", target: "30s/side" }
@@ -282,7 +286,12 @@ const routines = {
             { name: "Hip Circles", target: "10 reps" },
             { name: "Bodyweight Squats", target: "10 reps" }
         ],
-        exercises: [{ id: "bodyweight_squats", name: "Bodyweight Squats", target: "3 x 15-20", sets: 3, reps: "15-20", type: "BW", tempo: "3-1-2", rest: 60 }, { id: "lunges", name: "Lunges", target: "3 x 10/leg", sets: 3, reps: "10 each", type: "BW", tempo: "2-1-1", rest: 60 }, { id: "glute_bridges", name: "Glute Bridges", target: "3 x 15", sets: 3, reps: "15", type: "BW", tempo: "2-2-1", rest: 45 }, { id: "calf_raises", name: "Calf Raises", target: "3 x 20", sets: 3, reps: "20", type: "BW", tempo: "2-1-2", rest: 30 }],
+        exercises: [
+            { id: "goblet_squats", name: "Goblet Squats", target: "4 x 10-12", sets: 4, reps: "10-12", type: "DB", weight: 5, tempo: "3-1-2", rest: 120, note: "Hold weight at chest level" },
+            { id: "bulgarian_split_squats", name: "Bulgarian Split Squats", target: "3 x 8-10/leg", sets: 3, reps: "8-10 each", type: "BW", tempo: "3-1-2", rest: 90, note: "Rear foot elevated on chair" },
+            { id: "single_leg_hip_thrust", name: "Single-Leg Hip Thrust", target: "3 x 10-12/leg", sets: 3, reps: "10-12 each", type: "BW", tempo: "2-2-1", rest: 60, note: "Shoulders on couch/chair" },
+            { id: "single_leg_calf_raises", name: "Single-Leg Calf Raises", target: "3 x 12-15/leg", sets: 3, reps: "12-15 each", type: "BW", tempo: "2-2-2", rest: 45 }
+        ],
         cooldown: [
             { name: "Quad Stretch", target: "30s/side" },
             { name: "Hamstring Stretch", target: "30s/side" },
@@ -298,7 +307,12 @@ const routines = {
             { name: "Arm Circles", target: "20 reps" },
             { name: "Scapular Squeezes", target: "10 reps" }
         ],
-        exercises: [{ id: "db_rows", name: "DB Rows", target: "3 x 12/arm", sets: 3, reps: "12 each", type: "DB", weight: 2, tempo: "2-1-3", rest: 60 }, { id: "db_bicep_curls", name: "DB Bicep Curls", target: "3 x 12-15", sets: 3, reps: "12-15", type: "DB", weight: 2, tempo: "2-1-3", rest: 45 }, { id: "plank", name: "Plank", target: "3 x 30-45s", sets: 3, reps: "30-45s", type: "BW", rest: 45 }],
+        exercises: [
+            { id: "db_rows", name: "DB Rows", target: "4 x 8-10/arm", sets: 4, reps: "8-10 each", type: "DB", weight: 2, tempo: "2-1-3", rest: 90, note: "Squeeze shoulder blade at top" },
+            { id: "hammer_curls", name: "Hammer Curls", target: "3 x 10-12", sets: 3, reps: "10-12", type: "DB", weight: 2, tempo: "2-1-3", rest: 60, note: "Palms facing each other" },
+            { id: "db_bicep_curls", name: "DB Bicep Curls", target: "3 x 10-12", sets: 3, reps: "10-12", type: "DB", weight: 2, tempo: "2-1-3", rest: 60 },
+            { id: "dead_bug", name: "Dead Bug + Plank", target: "3 x 45s", sets: 3, reps: "45s", type: "BW", rest: 45, note: "30s dead bug + 15s plank" }
+        ],
         cooldown: [
             { name: "Lat Stretch", target: "30s/side" },
             { name: "Bicep Stretch", target: "30s/side" },
@@ -314,7 +328,12 @@ const routines = {
             { name: "Arm Circles", target: "20 reps" },
             { name: "Leg Swings", target: "10/side" }
         ],
-        exercises: [{ id: "knee_pushups", name: "Knee Pushups", target: "3 x 10-12", sets: 3, reps: "10-12", type: "BW", tempo: "2-1-2", rest: 60 }, { id: "bodyweight_squats2", name: "Bodyweight Squats", target: "3 x 15", sets: 3, reps: "15", type: "BW", tempo: "3-1-1", rest: 60 }, { id: "db_rows2", name: "DB Rows", target: "3 x 10/arm", sets: 3, reps: "10 each", type: "DB", weight: 2, tempo: "2-1-2", rest: 45 }, { id: "glute_bridges2", name: "Glute Bridges", target: "3 x 12", sets: 3, reps: "12", type: "BW", tempo: "2-2-1", rest: 45 }],
+        exercises: [
+            { id: "pushup_hold", name: "Push-up w/ Hold", target: "3 x 8-10", sets: 3, reps: "8-10", type: "BW", tempo: "3-2-1", rest: 90, note: "2s pause at bottom for stretch" },
+            { id: "goblet_squats2", name: "Goblet Squats", target: "3 x 12", sets: 3, reps: "12", type: "DB", weight: 5, tempo: "3-1-2", rest: 90 },
+            { id: "db_rows2", name: "DB Rows", target: "3 x 10/arm", sets: 3, reps: "10 each", type: "DB", weight: 2, tempo: "2-1-2", rest: 60 },
+            { id: "reverse_lunges", name: "Reverse Lunges", target: "3 x 10/leg", sets: 3, reps: "10 each", type: "BW", tempo: "2-1-2", rest: 60 }
+        ],
         cooldown: [
             { name: "Full Body Stretch", target: "2 mins" }
         ]
@@ -327,6 +346,87 @@ const fullMonthNames = ["January", "February", "March", "April", "May", "June", 
 // ============================================================================
 // COMPONENTS
 // ============================================================================
+
+// Weekly History Tracker - Shows workout performance over last 7 days
+const WeeklyProgress = ({ dailyLogs }) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Calculate last 7 days stats
+    const weekData = [];
+    let workoutDaysInWeek = 0;
+    let completedDays = 0;
+
+    for (let i = 6; i >= 0; i--) {
+        const checkDate = new Date(today);
+        checkDate.setDate(checkDate.getDate() - i);
+        const dateStr = checkDate.toISOString().split('T')[0];
+        const dayOfWeek = checkDate.getDay();
+        const isWorkoutDay = routines[dayOfWeek] !== undefined;
+        const log = dailyLogs.find(l => l.date === dateStr);
+        const completed = log?.workoutCompleted || false;
+
+        if (isWorkoutDay) workoutDaysInWeek++;
+        if (completed) completedDays++;
+
+        weekData.push({
+            date: checkDate,
+            dateStr,
+            dayName: dayNames[dayOfWeek].slice(0, 1),
+            isWorkoutDay,
+            completed,
+            isToday: i === 0
+        });
+    }
+
+    const percentComplete = workoutDaysInWeek > 0 ? Math.round((completedDays / workoutDaysInWeek) * 100) : 0;
+    const isOnTrack = percentComplete >= 75;
+    const isBehind = percentComplete < 50;
+
+    return (
+        <div className="mt-6 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+            <div className="flex justify-between items-center mb-3">
+                <h4 className="text-xs font-bold text-slate-600 uppercase tracking-wide flex items-center gap-2">
+                    <TrendingUp size={14} /> Weekly Progress
+                </h4>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isOnTrack ? 'bg-green-100 text-green-700' :
+                    isBehind ? 'bg-red-100 text-red-600' :
+                        'bg-amber-100 text-amber-700'
+                    }`}>
+                    {isOnTrack ? '✓ On Track' : isBehind ? '⚠ Behind' : '→ Catching Up'}
+                </span>
+            </div>
+
+            <div className="flex justify-between gap-1 mb-3">
+                {weekData.map((day, idx) => (
+                    <div key={idx} className="flex-1 flex flex-col items-center gap-1">
+                        <span className={`text-[9px] font-bold ${day.isToday ? 'text-slate-900' : 'text-slate-400'}`}>
+                            {day.dayName}
+                        </span>
+                        <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-[10px] ${!day.isWorkoutDay ? 'bg-slate-100 text-slate-300' :
+                            day.completed ? 'bg-emerald-500 text-white' :
+                                day.isToday ? 'bg-slate-200 text-slate-500 border-2 border-dashed border-slate-300' :
+                                    'bg-red-100 text-red-400'
+                            }`}>
+                            {!day.isWorkoutDay ? '—' : day.completed ? '✓' : day.isToday ? '?' : '✕'}
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            <div className="flex items-center gap-2">
+                <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
+                    <div
+                        className={`h-full transition-all duration-500 ${isOnTrack ? 'bg-emerald-500' : isBehind ? 'bg-red-400' : 'bg-amber-400'
+                            }`}
+                        style={{ width: `${percentComplete}%` }}
+                    />
+                </div>
+                <span className="text-xs font-bold text-slate-600">{completedDays}/{workoutDaysInWeek}</span>
+            </div>
+        </div>
+    );
+};
 
 const GlossaryModal = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
@@ -640,22 +740,66 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
 
     const calculateStreak = useCallback(() => {
         let streak = 0;
-        const sorted = [...dailyLogs].sort((a, b) => new Date(b.date) - new Date(a.date));
-        for (const log of sorted) {
-            if (log.workoutCompleted) streak++;
-            else break;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // Check each day going backwards from today
+        for (let i = 0; i < 365; i++) {
+            const checkDate = new Date(today);
+            checkDate.setDate(checkDate.getDate() - i);
+            const dateStr = checkDate.toISOString().split('T')[0];
+
+            const dayOfWeek = checkDate.getDay();
+            const isWorkoutDay = routines[dayOfWeek] !== undefined;
+
+            if (!isWorkoutDay) continue; // Skip rest days
+
+            const log = dailyLogs.find(l => l.date === dateStr);
+            if (log?.workoutCompleted) {
+                streak++;
+            } else {
+                // If today is a workout day and not yet completed, don't break (give chance)
+                if (i === 0 && dateStr === todayStr) continue;
+                break; // Streak broken
+            }
         }
         return streak;
-    }, [dailyLogs]);
+    }, [dailyLogs, todayStr]);
 
     const handleLog = (exercise) => {
         const val = inputs[exercise.id];
         if (!val) return;
+
+        // Check if date is editable (within last 7 days)
+        if (!isDateEditable(selectedDate)) {
+            alert('Cannot log workouts for dates older than 7 days.');
+            return;
+        }
+
         onLogWorkout(exercise.name, parseInt(val), exercise.weight || 0, selectedDate);
         setInputs(prev => ({ ...prev, [exercise.id]: '' }));
     };
 
+    // Check if a date is within the editable window (last 7 days + today)
+    const isDateEditable = (dateStr) => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const checkDate = new Date(dateStr);
+        checkDate.setHours(0, 0, 0, 0);
+
+        const sevenDaysAgo = new Date(today);
+        sevenDaysAgo.setDate(today.getDate() - 7);
+
+        return checkDate >= sevenDaysAgo && checkDate <= today;
+    };
+
+    const canEditSelectedDate = isDateEditable(selectedDate);
+
     const handleSaveFoodLog = async () => {
+        if (!canEditSelectedDate) {
+            alert('Cannot update food log for dates older than 7 days.');
+            return;
+        }
         setIsSavingFoodLog(true);
         await onUpdateFoodLog(foodLogInput, selectedDate);
         setIsSavingFoodLog(false);
@@ -756,11 +900,19 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
                             );
                         })}
                     </div>
+
+                    {/* Weekly History Tracker */}
+                    <WeeklyProgress dailyLogs={dailyLogs} />
                 </div>
 
-                <button onClick={() => setShowGlossary(true)} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-50 text-slate-500 mt-4">
-                    <BookOpen size={18} /><span className="text-sm font-bold">Fitness Terms</span>
-                </button>
+                <div className="mt-auto space-y-2">
+                    <button onClick={() => setShowGlossary(true)} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-50 text-slate-500">
+                        <BookOpen size={18} /><span className="text-sm font-bold">Fitness Terms</span>
+                    </button>
+                    <button onClick={onLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-50 text-red-500 border border-red-100">
+                        <LogOut size={18} /><span className="text-sm font-bold">Sign Out</span>
+                    </button>
+                </div>
             </aside>
 
             {/* Mobile Calendar Modal */}
@@ -884,10 +1036,11 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
             </main>
 
             {/* Mobile Bottom Nav */}
-            <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-100 flex justify-around py-1 safe-bottom z-40">
-                <button onClick={() => setActiveTab('workout')} className={`p-3 rounded-xl transition-all ${activeTab === 'workout' ? 'text-neon-green bg-slate-50' : 'text-slate-400'}`}><Dumbbell size={24} /></button>
+            <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-100 flex justify-around py-1 safe-bottom z-40">
+                <button onClick={() => setActiveTab('workout')} className={`p-3 rounded-xl transition-all ${activeTab === 'workout' ? 'text-emerald-600 bg-emerald-50' : 'text-slate-400'}`}><Dumbbell size={24} /></button>
                 <button onClick={() => setShowCalendar(true)} className="p-3 text-slate-400 active:scale-95"><Calendar size={24} /></button>
-                <button onClick={() => setActiveTab('nutrition')} className={`p-3 rounded-xl transition-all ${activeTab === 'nutrition' ? 'text-neon-green bg-slate-50' : 'text-slate-400'}`}><Flame size={24} /></button>
+                <button onClick={() => setActiveTab('nutrition')} className={`p-3 rounded-xl transition-all ${activeTab === 'nutrition' ? 'text-emerald-600 bg-emerald-50' : 'text-slate-400'}`}><Flame size={24} /></button>
+                <button onClick={onLogout} className="p-3 text-red-400 hover:text-red-500 active:scale-95"><LogOut size={24} /></button>
             </nav>
         </div>
     );
