@@ -221,7 +221,7 @@ app.post('/api/update-nutrition', async (req, res) => {
 });
 
 app.post('/api/log-workout', async (req, res) => {
-    const { exercise, reps, weight, date } = req.body;
+    const { exercise, reps, weight, date, notes } = req.body;
 
     // Validate date is within last 7 days
     const logDate = new Date(date);
@@ -238,10 +238,10 @@ app.post('/api/log-workout', async (req, res) => {
     }
 
     try {
-        // Insert set
+        // Insert set with notes
         const result = await db.run(
-            "INSERT INTO workout_sets (date, exercise_name, reps, weight) VALUES (?, ?, ?, ?)",
-            [date, exercise, reps, weight]
+            "INSERT INTO workout_sets (date, exercise_name, reps, weight, notes) VALUES (?, ?, ?, ?, ?)",
+            [date, exercise, reps, weight, notes || ""]
         );
 
         // Also ensure a daily_log entry exists so the day shows up in the list

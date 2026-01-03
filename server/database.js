@@ -39,6 +39,7 @@ function initSchema() {
             exercise_name TEXT NOT NULL,
             reps INTEGER NOT NULL,
             weight REAL DEFAULT 0,
+            notes TEXT DEFAULT "",
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
 

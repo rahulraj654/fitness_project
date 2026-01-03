@@ -662,8 +662,9 @@ const WarmupItem = ({ item, onClick }) => {
     );
 };
 
-const ExerciseCard = ({ exercise, guide, history, sets, onLog, onDeleteSet, inputValue, onInputChange, onStartRest, isCompleted, onOpenGlossary, lastSessionSets }) => {
+const ExerciseCard = ({ exercise, guide, history, sets, onLog, onDeleteSet, inputValue, onInputChange, notesValue, onNotesChange, onStartRest, isCompleted, onOpenGlossary, lastSessionSets }) => {
     const [expanded, setExpanded] = useState(false);
+    const [showNotes, setShowNotes] = useState(false);
 
     // Calculate last session stats for progressive overload comparison
     const lastSessionStats = lastSessionSets && lastSessionSets.length > 0 ? {
@@ -808,7 +809,42 @@ const ExerciseCard = ({ exercise, guide, history, sets, onLog, onDeleteSet, inpu
                             <Clock size={20} />
                         </button>
                     )}
+
+                    <button
+                        onClick={() => setShowNotes(!showNotes)}
+                        className={`px-3 rounded-xl transition-all ${showNotes ? 'bg-amber-100 text-amber-600' : 'bg-slate-50 text-slate-400 hover:bg-amber-50 hover:text-amber-500'}`}
+                        title="Add note"
+                    >
+                        <MessageSquare size={18} />
+                    </button>
                 </div>
+
+                {/* Notes Input */}
+                {showNotes && (
+                    <div className="mt-3 animate-fade-in">
+                        <input
+                            type="text"
+                            placeholder="Note: e.g., 'Shoulder felt tight, stopped early'"
+                            value={notesValue}
+                            onChange={(e) => onNotesChange(e.target.value)}
+                            className="w-full bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-amber-300 placeholder:text-amber-400 placeholder:text-xs"
+                        />
+                    </div>
+                )}
+
+                {/* Previous Session Notes (if any) */}
+                {lastSessionSets && lastSessionSets.some(s => s.notes) && (
+                    <div className="mt-3 bg-slate-50 rounded-xl p-3 border border-slate-100">
+                        <div className="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center gap-1">
+                            <MessageSquare size={10} /> Previous Notes
+                        </div>
+                        <div className="space-y-1">
+                            {lastSessionSets.filter(s => s.notes).map((s, i) => (
+                                <p key={i} className="text-xs text-slate-600 italic">"{s.notes}"</p>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 {/* Guide Section */}
                 {expanded && guide && (
@@ -880,6 +916,7 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
     const [restTimer, setRestTimer] = useState(null);
     const [foodLogInput, setFoodLogInput] = useState("");
     const [isSavingFoodLog, setIsSavingFoodLog] = useState(false);
+    const [notes, setNotes] = useState({});  // Notes per exercise
 
     const selDateObj = new Date(selectedDate);
     const dayOfWeek = selDateObj.getDay();
@@ -933,8 +970,10 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
             return;
         }
 
-        onLogWorkout(exercise.name, parseInt(val), exercise.weight || 0, selectedDate);
+        const exerciseNotes = notes[exercise.id] || "";
+        onLogWorkout(exercise.name, parseInt(val), exercise.weight || 0, selectedDate, exerciseNotes);
         setInputs(prev => ({ ...prev, [exercise.id]: '' }));
+        setNotes(prev => ({ ...prev, [exercise.id]: '' }));  // Clear notes after logging
 
         // Auto-start rest timer after logging
         if (exercise.rest) {
@@ -960,16 +999,24 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
     // Get last session sets for an exercise (for progressive overload comparison)
     const getLastSessionSets = useCallback((exerciseName) => {
         // Find the most recent log BEFORE the currently selected date that has this exercise
-        const sortedLogs = [...dailyLogs]
-            .filter(l => l.date < selectedDate && l.sets && l.sets.length > 0)
+        // We need to find when this exercise was last performed
+
+        // Get all logs that have sets
+        const logsWithSets = dailyLogs.filter(l => l.sets && l.sets.length > 0);
+
+        // Filter to logs before selected date and sort by date descending
+        const previousLogs = logsWithSets
+            .filter(l => new Date(l.date) < new Date(selectedDate))
             .sort((a, b) => new Date(b.date) - new Date(a.date));
 
-        for (const log of sortedLogs) {
+        // Search for this exercise in previous logs
+        for (const log of previousLogs) {
             const exerciseSets = (log.sets || []).filter(s => s.exercise_name === exerciseName);
             if (exerciseSets.length > 0) {
                 return exerciseSets;
             }
         }
+
         return null;
     }, [dailyLogs, selectedDate]);
 
@@ -1178,6 +1225,8 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
                                                 lastSessionSets={getLastSessionSets(ex.name)}
                                                 inputValue={inputs[ex.id] || ''}
                                                 onInputChange={(val) => setInputs(prev => ({ ...prev, [ex.id]: val }))}
+                                                notesValue={notes[ex.id] || ''}
+                                                onNotesChange={(val) => setNotes(prev => ({ ...prev, [ex.id]: val }))}
                                                 onLog={() => handleLog(ex)}
                                                 onDeleteSet={(setId) => onDeleteSet(setId, selectedDate)}
                                                 onStartRest={(secs) => setRestTimer(secs)}

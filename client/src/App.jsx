@@ -42,12 +42,12 @@ const App = () => {
         await updateFoodLog(foodLog, date);
     };
 
-    const handleLogWorkout = async (exercise, reps, weight, date) => {
+    const handleLogWorkout = async (exercise, reps, weight, date, notes = "") => {
         if (!data) return;
 
         // 1. Call API first to get the ID (slightly less optimistic but ensures ID consistency for deletion)
         // Or we can generate a temp ID, but let's wait for simplicity unless it's slow.
-        const res = await logWorkout(exercise, reps, weight, date);
+        const res = await logWorkout(exercise, reps, weight, date, notes);
 
         if (res && res.success) {
             const newData = { ...data };
@@ -64,13 +64,14 @@ const App = () => {
                 if (!todayLog.sets) todayLog.sets = [];
             }
 
-            // Add the new set
+            // Add the new set with notes
             todayLog.sets.push({
                 id: res.id,
                 date: date,
                 exercise_name: exercise,
                 reps: reps,
                 weight: weight,
+                notes: notes,
                 created_at: new Date().toISOString()
             });
 

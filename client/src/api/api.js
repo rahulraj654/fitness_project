@@ -125,7 +125,7 @@ export const updateNutrition = async (calories, protein, date) => {
     }
 };
 
-export const logWorkout = async (exercise, reps, weight, date) => {
+export const logWorkout = async (exercise, reps, weight, date, notes = "") => {
     try {
         const logDate = date || new Date().toISOString().split('T')[0];
         const response = await fetch(`${BASE_URL}/log-workout`, {
@@ -134,7 +134,7 @@ export const logWorkout = async (exercise, reps, weight, date) => {
                 'Content-Type': 'application/json',
                 'X-XSRF-Token': getCsrfToken()
             },
-            body: JSON.stringify({ exercise, reps, weight, date: logDate })
+            body: JSON.stringify({ exercise, reps, weight, date: logDate, notes })
         });
 
         if (response.status === 401 || (response.url && response.url.includes('login.html'))) {
