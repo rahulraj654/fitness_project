@@ -198,6 +198,54 @@ const WARMUP_GUIDE = {
     }
 };
 
+const COOLDOWN_GUIDE = {
+    "Chest Stretch": {
+        steps: ["Find a doorframe or wall", "Place forearm on frame at 90 degrees", "Lean forward slightly", "Feel stretch in chest"],
+        focus: "Open chest muscles",
+        videoTip: "Don't force it"
+    },
+    "Shoulder Stretch": {
+        steps: ["Bring arm across chest", "Hook with other arm", "Pull gently closer", "Keep shoulder down"],
+        focus: "Rear deltoid relief",
+        videoTip: "Breathe deeply"
+    },
+    "Quad Stretch": {
+        steps: ["Stand on one leg (hold wall)", "Grab other foot behind you", "Pull heel to glute", "Keep knees close"],
+        focus: "Front thigh release",
+        videoTip: "Push hips forward slightly"
+    },
+    "Hamstring Stretch": {
+        steps: ["Place heel on low surface", "Keep leg straight", "Hinge at hips firmly", "Keep back flat"],
+        focus: "Back of leg flexibility",
+        videoTip: "Don't round back"
+    },
+    "Calf Stretch": {
+        steps: ["Hands on wall", "Lunge one foot back", "Keep back heel flat on floor", "Lean into wall"],
+        focus: "Lower leg tightness",
+        videoTip: "Straight back leg"
+    },
+    "Lat Stretch": {
+        steps: ["Find a sturdy pole/doorframe", "Grab with one hand", "Lean hips back and away", "Feel stretch down side"],
+        focus: "Back width expansion",
+        videoTip: "Let weight hang"
+    },
+    "Bicep Stretch": {
+        steps: ["Interlace fingers behind back", "Straighten arms", "Lift arms gently up", "Open chest"],
+        focus: "Front arm release",
+        videoTip: "Keep chest tall"
+    },
+    "Lower Back Twist": {
+        steps: ["Lie on back", "Bring one knee to chest", "Pull across straight leg", "Look opposite way"],
+        focus: "Spine rotation",
+        videoTip: "Shoulders stay on ground"
+    },
+    "Full Body Stretch": {
+        steps: ["Reach hands high overhead", "Extend legs fully", "Make yourself as tall as possible", "Deep breaths"],
+        focus: "Total body release",
+        videoTip: "Reach for walls"
+    }
+};
+
 const QUOTES = [
     "The only bad workout is the one that didn't happen.",
     "Action is the foundational key to all success.",
@@ -220,7 +268,10 @@ const routines = {
             { name: "Wall Slides", target: "10 reps" }
         ],
         exercises: [{ id: "incline_pushups", name: "Incline Pushups", target: "3 x 10-12", sets: 3, reps: "10-12", type: "BW", tempo: "2-1-2", rest: 60 }, { id: "db_overhead_press", name: "DB Overhead Press", target: "3 x 12-15", sets: 3, reps: "12-15", type: "DB", weight: 2, tempo: "2-1-2", rest: 60 }, { id: "db_lateral_raises", name: "DB Lateral Raises", target: "3 x 12-15", sets: 3, reps: "12-15", type: "DB", weight: 2, tempo: "2-1-3", rest: 45 }],
-        cooldown: ["30s chest stretch each side", "30s shoulder stretch each side"]
+        cooldown: [
+            { name: "Chest Stretch", target: "30s/side" },
+            { name: "Shoulder Stretch", target: "30s/side" }
+        ]
     },
     2: {
         name: "Lower Body",
@@ -232,7 +283,11 @@ const routines = {
             { name: "Bodyweight Squats", target: "10 reps" }
         ],
         exercises: [{ id: "bodyweight_squats", name: "Bodyweight Squats", target: "3 x 15-20", sets: 3, reps: "15-20", type: "BW", tempo: "3-1-2", rest: 60 }, { id: "lunges", name: "Lunges", target: "3 x 10/leg", sets: 3, reps: "10 each", type: "BW", tempo: "2-1-1", rest: 60 }, { id: "glute_bridges", name: "Glute Bridges", target: "3 x 15", sets: 3, reps: "15", type: "BW", tempo: "2-2-1", rest: 45 }, { id: "calf_raises", name: "Calf Raises", target: "3 x 20", sets: 3, reps: "20", type: "BW", tempo: "2-1-2", rest: 30 }],
-        cooldown: ["30s quad stretch each side", "30s hamstring stretch", "30s calf stretch each side"]
+        cooldown: [
+            { name: "Quad Stretch", target: "30s/side" },
+            { name: "Hamstring Stretch", target: "30s/side" },
+            { name: "Calf Stretch", target: "30s/side" }
+        ]
     },
     4: {
         name: "Upper Pull",
@@ -244,7 +299,11 @@ const routines = {
             { name: "Scapular Squeezes", target: "10 reps" }
         ],
         exercises: [{ id: "db_rows", name: "DB Rows", target: "3 x 12/arm", sets: 3, reps: "12 each", type: "DB", weight: 2, tempo: "2-1-3", rest: 60 }, { id: "db_bicep_curls", name: "DB Bicep Curls", target: "3 x 12-15", sets: 3, reps: "12-15", type: "DB", weight: 2, tempo: "2-1-3", rest: 45 }, { id: "plank", name: "Plank", target: "3 x 30-45s", sets: 3, reps: "30-45s", type: "BW", rest: 45 }],
-        cooldown: ["30s lat stretch each side", "30s bicep stretch", "30s lower back twist each side"]
+        cooldown: [
+            { name: "Lat Stretch", target: "30s/side" },
+            { name: "Bicep Stretch", target: "30s/side" },
+            { name: "Lower Back Twist", target: "30s/side" }
+        ]
     },
     5: {
         name: "Full Body",
@@ -256,7 +315,9 @@ const routines = {
             { name: "Leg Swings", target: "10/side" }
         ],
         exercises: [{ id: "knee_pushups", name: "Knee Pushups", target: "3 x 10-12", sets: 3, reps: "10-12", type: "BW", tempo: "2-1-2", rest: 60 }, { id: "bodyweight_squats2", name: "Bodyweight Squats", target: "3 x 15", sets: 3, reps: "15", type: "BW", tempo: "3-1-1", rest: 60 }, { id: "db_rows2", name: "DB Rows", target: "3 x 10/arm", sets: 3, reps: "10 each", type: "DB", weight: 2, tempo: "2-1-2", rest: 45 }, { id: "glute_bridges2", name: "Glute Bridges", target: "3 x 12", sets: 3, reps: "12", type: "BW", tempo: "2-2-1", rest: 45 }],
-        cooldown: ["Full body stretch 2 minutes"]
+        cooldown: [
+            { name: "Full Body Stretch", target: "2 mins" }
+        ]
     }
 };
 
@@ -392,7 +453,7 @@ const DailyQuote = () => {
 };
 
 const WarmupItem = ({ item, onClick }) => {
-    const guide = WARMUP_GUIDE[item.name] || EXERCISE_GUIDE[item.name];
+    const guide = WARMUP_GUIDE[item.name] || EXERCISE_GUIDE[item.name] || COOLDOWN_GUIDE[item.name];
     const [isOpen, setIsOpen] = useState(false);
 
     return (
@@ -796,10 +857,12 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
                                 })}
 
                                 {/* Cooldown */}
-                                <div className="bg-blue-50 rounded-2xl p-6 border border-blue-100 mt-8">
-                                    <h4 className="text-xs font-black text-blue-600 uppercase mb-4 flex items-center gap-2 tracking-wide"><Award size={16} /> Cooldown</h4>
-                                    <div className="flex flex-wrap gap-3">
-                                        {routine.cooldown.map((c, i) => (<span key={i} className="bg-white px-4 py-2 rounded-xl text-sm font-bold text-slate-600 border border-slate-100">{c}</span>))}
+                                <div className="bg-blue-50/50 rounded-3xl p-6 mt-8 border border-blue-100">
+                                    <h4 className="text-xs font-black text-blue-600 uppercase mb-4 flex items-center gap-2 tracking-wide"><Award size={16} /> Cooldown Recovery</h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                        {routine.cooldown.map((c, i) => (
+                                            <WarmupItem key={i} item={c} />
+                                        ))}
                                     </div>
                                 </div>
                             </div>
