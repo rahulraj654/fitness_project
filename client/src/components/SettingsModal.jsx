@@ -61,7 +61,7 @@ const SettingsModal = ({ user, isOpen, onClose, onSave }) => {
                             min="30"
                             max="200"
                             step="0.1"
-                            className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-slate-950 font-black text-lg focus:outline-none focus:border-neon-green transition-colors"
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-slate-950 font-black text-lg focus:outline-none focus:border-emerald-500 transition-colors"
                         />
                     </div>
                 </div>
@@ -69,7 +69,7 @@ const SettingsModal = ({ user, isOpen, onClose, onSave }) => {
                 {/* Save Button */}
                 <button
                     onClick={handleSave}
-                    className="w-full mt-8 bg-neon-green text-black font-black uppercase tracking-wider py-4 rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_4px_20px_rgba(57,255,20,0.3)]"
+                    className="w-full mt-8 bg-emerald-500 text-white font-black uppercase tracking-wider py-4 rounded-xl hover:bg-emerald-600 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-emerald-500/30"
                 >
                     Save Profile
                 </button>

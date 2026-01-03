@@ -152,6 +152,87 @@ const EXERCISE_GUIDE = {
         easier: "Two hands on wall",
         harder: "Single leg",
         videoTip: "See over a crowd"
+    },
+    "Push-up Progression": {
+        difficulty: "Beginner",
+        steps: ["Start at your current level (incline/knee/full)", "Lower chest with control (3s)", "Push up explosively", "Progress to harder variation when 12 reps is easy"],
+        mistakes: ["Sagging hips", "Flaring elbows too wide", "Not using full range of motion"],
+        feel: "Chest and triceps burning",
+        easier: "Use higher incline surface",
+        harder: "Decline push-ups (feet elevated)",
+        videoTip: "Keep body in straight line from head to heels"
+    },
+    "Goblet Squats": {
+        difficulty: "Beginner",
+        steps: ["Hold weight at chest with both hands", "Feet shoulder-width apart", "Squat down keeping chest up", "Drive through heels to stand"],
+        mistakes: ["Leaning forward", "Knees caving in", "Not going deep enough"],
+        feel: "Quads, glutes, and core working",
+        easier: "Bodyweight squat",
+        harder: "Add more weight or pause at bottom",
+        videoTip: "Elbows should touch inside of knees at bottom"
+    },
+    "Bulgarian Split Squats": {
+        difficulty: "Intermediate",
+        steps: ["Place rear foot on elevated surface behind you", "Lower until front thigh is parallel", "Keep torso upright", "Drive through front heel to stand"],
+        mistakes: ["Leaning too far forward", "Front knee going past toes", "Losing balance"],
+        feel: "Intense burn in front leg quad and glute",
+        easier: "Lower the rear foot height",
+        harder: "Hold dumbbells",
+        videoTip: "Most of your weight should be on the front leg"
+    },
+    "Single-Leg Hip Thrust": {
+        difficulty: "Intermediate",
+        steps: ["Shoulders on couch/bench, one foot on floor", "Lift other leg up or hold at chest", "Drive hips up squeezing glute", "Lower with control"],
+        mistakes: ["Hyperextending lower back", "Not squeezing at top", "Using momentum"],
+        feel: "Intense glute activation on working leg",
+        easier: "Two-leg hip thrust",
+        harder: "Add weight on hips",
+        videoTip: "Push through your heel, not toes"
+    },
+    "Single-Leg Calf Raises": {
+        difficulty: "Beginner",
+        steps: ["Stand on one leg, hand on wall", "Rise as high as possible on toes", "Squeeze at top for 1-2s", "Lower slowly below platform level if possible"],
+        mistakes: ["Bouncing", "Not using full range", "Rushing reps"],
+        feel: "Deep calf burn",
+        easier: "Two-leg raises",
+        harder: "Hold weight in free hand",
+        videoTip: "Go slowly on the way down for more growth"
+    },
+    "Hammer Curls": {
+        difficulty: "Beginner",
+        steps: ["Hold weights with palms facing each other", "Keep elbows pinned to sides", "Curl weights to shoulders", "Lower slowly (3s)"],
+        mistakes: ["Swinging body", "Moving elbows forward", "Using momentum"],
+        feel: "Biceps and forearms burning",
+        easier: "Alternate arms",
+        harder: "Cross-body hammer curls",
+        videoTip: "Palms face each other throughout - like holding hammers"
+    },
+    "Dead Bug + Plank": {
+        difficulty: "Beginner",
+        steps: ["Dead Bug: Lie on back, extend opposite arm/leg while keeping lower back flat", "Hold plank on forearms", "Keep core braced throughout", "Breathe steadily"],
+        mistakes: ["Lower back arching during dead bug", "Hips sagging in plank", "Holding breath"],
+        feel: "Core shaking, deep ab engagement",
+        easier: "Just do plank",
+        harder: "Add more dead bug reps",
+        videoTip: "Press lower back into floor during dead bug"
+    },
+    "Push-up w/ Hold": {
+        difficulty: "Beginner",
+        steps: ["Lower into push-up position", "Pause at bottom for 2 seconds", "Push up with control", "Repeat maintaining the pause each rep"],
+        mistakes: ["Collapsing at bottom", "Rushing the pause", "Losing form when tired"],
+        feel: "Deep chest stretch and increased time under tension",
+        easier: "Do on knees",
+        harder: "Increase pause to 3s",
+        videoTip: "The pause eliminates momentum - pure muscle work"
+    },
+    "Reverse Lunges": {
+        difficulty: "Beginner",
+        steps: ["Step backward with one leg", "Lower until both knees at 90°", "Push through front heel to stand", "Alternate legs or complete all reps on one side"],
+        mistakes: ["Stepping back too short", "Front knee caving in", "Leaning forward"],
+        feel: "Quads and glutes working hard",
+        easier: "Hold wall for balance",
+        harder: "Hold dumbbells",
+        videoTip: "Step straight back, not at an angle"
     }
 };
 
@@ -436,14 +517,14 @@ const GlossaryModal = ({ isOpen, onClose }) => {
             <div className="bg-white rounded-3xl p-6 max-w-sm w-full relative z-10 animate-fade-in-up shadow-2xl overflow-hidden">
                 <button onClick={onClose} className="absolute top-4 right-4 p-2 bg-slate-100 rounded-full"><X size={20} /></button>
                 <div className="flex items-center gap-3 mb-6">
-                    <div className="p-3 bg-neon-green/20 text-green-700 rounded-xl"><BookOpen size={24} /></div>
+                    <div className="p-3 bg-emerald-100 text-emerald-700 rounded-xl"><BookOpen size={24} /></div>
                     <h3 className="text-xl font-black text-slate-900">Fitness Terms</h3>
                 </div>
                 <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
                     {Object.entries(GLOSSARY).map(([term, def]) => (
                         <div key={term} className="bg-slate-50 p-4 rounded-2xl">
                             <h4 className="font-bold text-slate-900 mb-1 flex items-center gap-2">
-                                <span className="w-1.5 h-1.5 bg-neon-green rounded-full" /> {term}
+                                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" /> {term}
                             </h4>
                             <p className="text-sm text-slate-600 leading-relaxed">{def}</p>
                         </div>
@@ -498,17 +579,17 @@ const DailyBriefing = ({ routineName, briefing, onOpenGlossary }) => {
     if (!briefing) return null;
     return (
         <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-6 md:p-8 text-white mb-8 shadow-xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-neon-green/10 rounded-full blur-3xl -translate-y-10 translate-x-10" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-400/20 rounded-full blur-3xl -translate-y-10 translate-x-10" />
 
             <div className="flex justify-between items-start mb-6 relative z-10">
                 <div>
                     <div className="flex items-center gap-2 mb-2">
-                        <span className="bg-neon-green text-slate-900 text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider">Today's Focus</span>
+                        <span className="bg-emerald-400 text-slate-900 text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider">Today's Focus</span>
                     </div>
                     <h3 className="text-2xl font-black text-white">{briefing.focus}</h3>
                 </div>
                 <button onClick={onOpenGlossary} className="bg-white/10 hover:bg-white/20 p-2 rounded-xl backdrop-blur-md transition-colors">
-                    <HelpCircle size={20} className="text-neon-green" />
+                    <HelpCircle size={20} className="text-emerald-400" />
                 </button>
             </div>
 
@@ -540,9 +621,9 @@ const DailyQuote = () => {
     }, []);
 
     return (
-        <div className="bg-slate-50 border-l-4 border-neon-green p-4 rounded-r-xl mb-8 animate-fade-in-up">
+        <div className="bg-slate-50 border-l-4 border-emerald-500 p-4 rounded-r-xl mb-8 animate-fade-in-up">
             <div className="flex gap-3">
-                <div className="text-neon-green"><Lightbulb size={24} /></div>
+                <div className="text-emerald-500"><Lightbulb size={24} /></div>
                 <div>
                     <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Daily Fuel</h4>
                     <p className="text-slate-700 italic font-medium leading-relaxed">"{quote}"</p>
@@ -563,13 +644,13 @@ const WarmupItem = ({ item, onClick }) => {
                 className={`w-full text-left transition-all ${isOpen ? 'bg-slate-800 text-white ring-2 ring-slate-800' : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-100'} p-3 rounded-xl flex flex-col gap-1 shadow-sm`}>
                 <div className="flex justify-between items-center w-full">
                     <span className="font-bold text-sm">{item.name}</span>
-                    <span className={`text-[10px] uppercase font-black px-2 py-0.5 rounded ${isOpen ? 'bg-neon-green text-slate-900' : 'bg-slate-100 text-slate-500'}`}>{item.target}</span>
+                    <span className={`text-[10px] uppercase font-black px-2 py-0.5 rounded ${isOpen ? 'bg-emerald-400 text-slate-900' : 'bg-slate-100 text-slate-500'}`}>{item.target}</span>
                 </div>
                 {isOpen && guide && (
                     <div className="mt-3 pt-3 border-t border-slate-700/50 animate-fade-in text-xs space-y-2">
                         {guide.steps && (
                             <ul className="space-y-1">
-                                {guide.steps.map((s, i) => <li key={i} className="flex gap-2 text-slate-300"><span className="text-neon-green">•</span> {s}</li>)}
+                                {guide.steps.map((s, i) => <li key={i} className="flex gap-2 text-slate-300"><span className="text-emerald-400">•</span> {s}</li>)}
                             </ul>
                         )}
                         {guide.focus && <p className="text-slate-400">Focus: <span className="text-white">{guide.focus}</span></p>}
@@ -585,14 +666,14 @@ const ExerciseCard = ({ exercise, guide, history, sets, onLog, onDeleteSet, inpu
     const [expanded, setExpanded] = useState(false);
 
     return (
-        <div className={`glass-card overflow-hidden transition-all duration-300 ${isCompleted ? 'border-neon-green bg-green-50/50 shadow-lg shadow-green-500/10' : ''}`}>
+        <div className={`glass-card overflow-hidden transition-all duration-300 ${isCompleted ? 'border-emerald-500 bg-emerald-50/50 shadow-lg shadow-emerald-500/10' : ''}`}>
             {/* Header */}
             <div className="p-4 md:p-5">
                 <div className="flex justify-between items-start gap-3 mb-3">
                     <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                             {guide?.difficulty === "Beginner" && <span className="badge bg-green-100 text-green-700 text-[10px] px-2 py-0.5">BEGINNER</span>}
-                            {isCompleted && <span className="badge bg-neon-green text-slate-900 flex items-center gap-1 text-[10px] px-2 py-0.5"><CheckCircle2 size={10} /> DONE</span>}
+                            {isCompleted && <span className="badge bg-emerald-400 text-slate-900 flex items-center gap-1 text-[10px] px-2 py-0.5"><CheckCircle2 size={10} /> DONE</span>}
                         </div>
                         <h3 className="text-lg md:text-xl font-black text-slate-900 leading-tight">{exercise.name}</h3>
                     </div>
@@ -638,12 +719,12 @@ const ExerciseCard = ({ exercise, guide, history, sets, onLog, onDeleteSet, inpu
                             placeholder="Reps"
                             value={inputValue}
                             onChange={(e) => onInputChange(e.target.value)}
-                            className="w-full h-full bg-slate-50 border border-slate-200 rounded-xl px-4 text-slate-900 font-black text-center text-lg focus:outline-none focus:ring-2 focus:ring-neon-green/50 focus:border-neon-green focus:bg-white transition-all placeholder:text-slate-300 placeholder:font-medium placeholder:text-sm"
+                            className="w-full h-full bg-slate-50 border border-slate-200 rounded-xl px-4 text-slate-900 font-black text-center text-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 focus:bg-white transition-all placeholder:text-slate-300 placeholder:font-medium placeholder:text-sm"
                         />
                     </div>
 
                     <button onClick={onLog} className={`px-4 md:px-6 rounded-xl font-bold transition-all active:scale-95 flex items-center gap-2 shadow-lg shadow-neon-green/10 whitespace-nowrap
-                        ${isCompleted ? 'bg-neon-green text-slate-900 hover:bg-slate-800 hover:text-white' : 'bg-slate-900 text-white hover:bg-neon-green hover:text-slate-900'}`}>
+                        ${isCompleted ? 'bg-emerald-400 text-slate-900 hover:bg-slate-800 hover:text-white' : 'bg-slate-900 text-white hover:bg-emerald-400 hover:text-slate-900'}`}>
                         {isCompleted ? <CheckCircle2 size={20} /> : "Log"}
                     </button>
 
@@ -835,42 +916,42 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
             {restTimer && <RestTimer seconds={restTimer} onComplete={() => setRestTimer(null)} onCancel={() => setRestTimer(null)} />}
 
             {/* Mobile Header */}
-            <header className="md:hidden sticky top-0 z-40 bg-white/90 backdrop-blur-lg border-b border-slate-100 px-4 py-3">
+            <header className="md:hidden sticky top-0 z-40 bg-white/95 backdrop-blur-lg border-b border-slate-100 px-4 py-3">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-xl font-black text-slate-900 tracking-tight">FITNESS<span className="text-neon-green">TRACKER</span></h1>
+                        <h1 className="text-xl font-black text-slate-900 tracking-tight">FITNESS<span className="text-emerald-500">TRACKER</span></h1>
                         <p className="text-xs text-slate-500 font-medium">{isSelectedToday ? "Today" : selDateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
                     </div>
-                    <div className="flex items-center gap-3">
-                        <button onClick={() => setShowGlossary(true)} className="p-2 text-slate-400"><HelpCircle size={24} /></button>
-                        <div className="w-10 h-10 bg-slate-900 rounded-full flex items-center justify-center text-neon-green font-black shadow-lg shadow-neon-green/20">
+                    <div className="flex items-center gap-2">
+                        <button onClick={() => setShowGlossary(true)} className="p-2 text-slate-400 hover:text-slate-600"><HelpCircle size={22} /></button>
+                        <div className="w-10 h-10 bg-gradient-to-br from-slate-800 to-slate-900 rounded-full flex items-center justify-center text-emerald-400 font-black shadow-lg">
                             {user.streak || calculateStreak()}
                         </div>
-                        <button onClick={() => setShowSidebar(true)} className="p-2"><Menu size={24} /></button>
                     </div>
                 </div>
             </header>
 
             {/* Desktop Sidebar (Left) */}
-            <aside className="hidden md:flex fixed left-0 top-0 h-screen w-72 bg-white border-r border-slate-100 flex-col p-6 z-50">
-                <div className="mb-8">
-                    <h1 className="text-2xl font-black text-slate-900 tracking-tight">FITNESS<span className="text-neon-green">TRACKER</span></h1>
+            <aside className="hidden md:flex fixed left-0 top-0 h-screen w-72 bg-white border-r border-slate-100 flex-col p-6 z-50 overflow-hidden">
+                <div className="mb-6 flex-shrink-0">
+                    <h1 className="text-2xl font-black text-slate-900 tracking-tight">FITNESS<span className="text-emerald-500">TRACKER</span></h1>
                 </div>
 
-                <div className="bg-slate-900 rounded-2xl p-5 mb-8 text-white relative overflow-hidden">
+                <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-5 mb-6 text-white relative overflow-hidden flex-shrink-0">
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-400/20 rounded-full blur-2xl" />
                     <div className="flex items-center gap-4 relative z-10">
-                        <div className="w-12 h-12 bg-neon-green rounded-xl flex items-center justify-center text-slate-900 font-black text-2xl">
+                        <div className="w-14 h-14 bg-emerald-400 rounded-xl flex items-center justify-center text-slate-900 font-black text-2xl shadow-lg shadow-emerald-400/30">
                             {user.streak || calculateStreak()}
                         </div>
                         <div>
-                            <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Streak</div>
-                            <div className="font-bold text-lg">Days Active</div>
+                            <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Current Streak</div>
+                            <div className="font-bold text-lg text-white">Days Active</div>
                         </div>
                     </div>
                 </div>
 
-                {/* Calendar */}
-                <div className="flex-grow">
+                {/* Calendar - scrollable section */}
+                <div className="flex-1 overflow-y-auto min-h-0 pr-1">
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="font-bold text-slate-900 flex items-center gap-2">{fullMonthNames[viewMonth]} <span className="text-slate-400">{viewYear}</span></h3>
                         <div className="flex gap-1">
@@ -886,10 +967,10 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
                             if (!dateStr) return <div key={`e-${idx}`} />;
                             const status = getDayStatus(dateStr);
                             const isSelected = dateStr === selectedDate;
-                            let bgClass = "bg-slate-50 text-slate-400 hover:bg-slate-100";
-                            if (status === 'complete') bgClass = "bg-green-100 text-green-700 font-bold border-2 border-green-200";
-                            if (status === 'missed') bgClass = "bg-red-50 text-red-400 border-2 border-red-100";
-                            if (status === 'pending') bgClass = "bg-slate-100 text-slate-600 border-2 border-dashed border-slate-300";
+                            let bgClass = "bg-slate-50 text-slate-500 hover:bg-slate-100";
+                            if (status === 'complete') bgClass = "bg-emerald-100 text-emerald-700 font-bold border-2 border-emerald-200";
+                            if (status === 'missed') bgClass = "bg-red-50 text-red-500 border-2 border-red-100";
+                            if (status === 'pending') bgClass = "bg-amber-50 text-amber-600 border-2 border-dashed border-amber-200";
                             if (isSelected) bgClass = "bg-slate-900 text-white shadow-lg shadow-slate-900/40 transform scale-110 z-10";
 
                             return (
@@ -905,8 +986,8 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
                     <WeeklyProgress dailyLogs={dailyLogs} />
                 </div>
 
-                <div className="mt-auto space-y-2">
-                    <button onClick={() => setShowGlossary(true)} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-50 text-slate-500">
+                <div className="mt-4 pt-4 border-t border-slate-100 space-y-2 flex-shrink-0">
+                    <button onClick={() => setShowGlossary(true)} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-50 text-slate-600">
                         <BookOpen size={18} /><span className="text-sm font-bold">Fitness Terms</span>
                     </button>
                     <button onClick={onLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-50 text-red-500 border border-red-100">
@@ -949,7 +1030,7 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
             <main className="md:ml-72 px-4 md:px-12 py-8 max-w-5xl mx-auto">
                 {/* Header */}
                 <header className="mb-8 animate-fade-in-up">
-                    <p className="text-xs text-neon-green font-bold uppercase tracking-widest mb-2">
+                    <p className="text-xs text-emerald-600 font-bold uppercase tracking-widest mb-2">
                         {isSelectedToday ? "Today's Plan" : selDateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
                     </p>
                     <h2 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight flex flex-wrap items-center gap-4">
