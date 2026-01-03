@@ -662,8 +662,51 @@ const WarmupItem = ({ item, onClick }) => {
     );
 };
 
-const ExerciseCard = ({ exercise, guide, history, sets, onLog, onDeleteSet, inputValue, onInputChange, onStartRest, isCompleted, onOpenGlossary }) => {
+const ExerciseCard = ({ exercise, guide, history, sets, onLog, onDeleteSet, inputValue, onInputChange, onStartRest, isCompleted, onOpenGlossary, lastSessionSets }) => {
     const [expanded, setExpanded] = useState(false);
+
+    // Calculate last session stats for progressive overload comparison
+    const lastSessionStats = lastSessionSets && lastSessionSets.length > 0 ? {
+        totalReps: lastSessionSets.reduce((sum, s) => sum + s.reps, 0),
+        setsCount: lastSessionSets.length,
+        avgReps: Math.round(lastSessionSets.reduce((sum, s) => sum + s.reps, 0) / lastSessionSets.length),
+        maxReps: Math.max(...lastSessionSets.map(s => s.reps))
+    } : null;
+
+    // Current session stats
+    const currentStats = sets && sets.length > 0 ? {
+        totalReps: sets.reduce((sum, s) => sum + s.reps, 0),
+        setsCount: sets.length
+    } : null;
+
+    // Comparison
+    const getComparison = () => {
+        if (!lastSessionStats || !currentStats) return null;
+        const diff = currentStats.totalReps - lastSessionStats.totalReps;
+        if (diff > 0) return { type: 'up', diff, color: 'text-emerald-600', bg: 'bg-emerald-50' };
+        if (diff < 0) return { type: 'down', diff: Math.abs(diff), color: 'text-red-500', bg: 'bg-red-50' };
+        return { type: 'same', diff: 0, color: 'text-slate-500', bg: 'bg-slate-50' };
+    };
+
+    const comparison = getComparison();
+
+    // Motivational message
+    const getMotivation = () => {
+        if (!lastSessionStats) return "First time! Set your baseline 💪";
+        if (!currentStats || currentStats.setsCount === 0) {
+            return `Last session: ${lastSessionStats.totalReps} total reps (${lastSessionStats.setsCount} sets)`;
+        }
+        if (currentStats.setsCount < lastSessionStats.setsCount) {
+            return `${lastSessionStats.setsCount - currentStats.setsCount} more set(s) to match last time!`;
+        }
+        if (currentStats.totalReps < lastSessionStats.totalReps) {
+            return `${lastSessionStats.totalReps - currentStats.totalReps} more reps to beat last session!`;
+        }
+        if (currentStats.totalReps > lastSessionStats.totalReps) {
+            return "🎉 New personal best! You're getting stronger!";
+        }
+        return "Matched last session! Try 1 more rep next set 💪";
+    };
 
     return (
         <div className={`glass-card overflow-hidden transition-all duration-300 ${isCompleted ? 'border-emerald-500 bg-emerald-50/50 shadow-lg shadow-emerald-500/10' : ''}`}>
@@ -671,12 +714,44 @@ const ExerciseCard = ({ exercise, guide, history, sets, onLog, onDeleteSet, inpu
             <div className="p-4 md:p-5">
                 <div className="flex justify-between items-start gap-3 mb-3">
                     <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
                             {guide?.difficulty === "Beginner" && <span className="badge bg-green-100 text-green-700 text-[10px] px-2 py-0.5">BEGINNER</span>}
+                            {guide?.difficulty === "Intermediate" && <span className="badge bg-amber-100 text-amber-700 text-[10px] px-2 py-0.5">INTERMEDIATE</span>}
                             {isCompleted && <span className="badge bg-emerald-400 text-slate-900 flex items-center gap-1 text-[10px] px-2 py-0.5"><CheckCircle2 size={10} /> DONE</span>}
+                            {comparison && (
+                                <span className={`badge ${comparison.bg} ${comparison.color} flex items-center gap-1 text-[10px] px-2 py-0.5`}>
+                                    {comparison.type === 'up' && <TrendingUp size={10} />}
+                                    {comparison.type === 'down' && <span className="rotate-180"><TrendingUp size={10} /></span>}
+                                    {comparison.type === 'up' ? `+${comparison.diff}` : comparison.type === 'down' ? `-${comparison.diff}` : '='}
+                                </span>
+                            )}
                         </div>
                         <h3 className="text-lg md:text-xl font-black text-slate-900 leading-tight">{exercise.name}</h3>
+                        {exercise.note && <p className="text-xs text-slate-500 mt-1 italic">{exercise.note}</p>}
                     </div>
+                </div>
+
+                {/* Progressive Overload - Last Session Stats */}
+                {lastSessionStats && (
+                    <div className="bg-gradient-to-r from-slate-50 to-slate-100 p-3 rounded-xl mb-3 border border-slate-200">
+                        <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                                <History size={14} className="text-slate-400" />
+                                <span className="text-[10px] font-bold text-slate-500 uppercase">Last Session</span>
+                            </div>
+                            <div className="flex items-center gap-3 text-xs">
+                                <span className="text-slate-600"><strong className="text-slate-900">{lastSessionStats.setsCount}</strong> sets</span>
+                                <span className="text-slate-600"><strong className="text-slate-900">{lastSessionStats.totalReps}</strong> total reps</span>
+                                <span className="text-slate-600">avg <strong className="text-slate-900">{lastSessionStats.avgReps}</strong>/set</span>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Motivation Message */}
+                <div className="text-xs text-slate-500 mb-3 flex items-center gap-2">
+                    <Target size={12} className="text-emerald-500 flex-shrink-0" />
+                    <span>{getMotivation()}</span>
                 </div>
 
                 {/* Target & Stats - Compact Grid */}
@@ -716,14 +791,14 @@ const ExerciseCard = ({ exercise, guide, history, sets, onLog, onDeleteSet, inpu
                     <div className="flex-1 relative">
                         <input
                             type="number"
-                            placeholder="Reps"
+                            placeholder={lastSessionStats ? `Beat ${lastSessionStats.avgReps}` : "Reps"}
                             value={inputValue}
                             onChange={(e) => onInputChange(e.target.value)}
                             className="w-full h-full bg-slate-50 border border-slate-200 rounded-xl px-4 text-slate-900 font-black text-center text-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 focus:bg-white transition-all placeholder:text-slate-300 placeholder:font-medium placeholder:text-sm"
                         />
                     </div>
 
-                    <button onClick={onLog} className={`px-4 md:px-6 rounded-xl font-bold transition-all active:scale-95 flex items-center gap-2 shadow-lg shadow-neon-green/10 whitespace-nowrap
+                    <button onClick={onLog} className={`px-4 md:px-6 rounded-xl font-bold transition-all active:scale-95 flex items-center gap-2 shadow-lg whitespace-nowrap
                         ${isCompleted ? 'bg-emerald-400 text-slate-900 hover:bg-slate-800 hover:text-white' : 'bg-slate-900 text-white hover:bg-emerald-400 hover:text-slate-900'}`}>
                         {isCompleted ? <CheckCircle2 size={20} /> : "Log"}
                     </button>
@@ -775,6 +850,7 @@ const ExerciseCard = ({ exercise, guide, history, sets, onLog, onDeleteSet, inpu
                     <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
                         {sets.map((set, i) => (
                             <div key={set.id || i} className="flex items-center gap-2 bg-white border border-slate-100 rounded-lg px-2 py-1.5 shadow-sm flex-shrink-0">
+                                <span className="text-[10px] text-slate-400 font-bold">#{i + 1}</span>
                                 <span className="text-xs font-bold text-slate-900">{set.reps} reps</span>
                                 <button onClick={() => onDeleteSet(set.id)} className="text-slate-300 hover:text-red-500 transition-colors">
                                     <X size={12} />
@@ -859,6 +935,11 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
 
         onLogWorkout(exercise.name, parseInt(val), exercise.weight || 0, selectedDate);
         setInputs(prev => ({ ...prev, [exercise.id]: '' }));
+
+        // Auto-start rest timer after logging
+        if (exercise.rest) {
+            setRestTimer(exercise.rest);
+        }
     };
 
     // Check if a date is within the editable window (last 7 days + today)
@@ -875,6 +956,22 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
     };
 
     const canEditSelectedDate = isDateEditable(selectedDate);
+
+    // Get last session sets for an exercise (for progressive overload comparison)
+    const getLastSessionSets = useCallback((exerciseName) => {
+        // Find the most recent log BEFORE the currently selected date that has this exercise
+        const sortedLogs = [...dailyLogs]
+            .filter(l => l.date < selectedDate && l.sets && l.sets.length > 0)
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        for (const log of sortedLogs) {
+            const exerciseSets = (log.sets || []).filter(s => s.exercise_name === exerciseName);
+            if (exerciseSets.length > 0) {
+                return exerciseSets;
+            }
+        }
+        return null;
+    }, [dailyLogs, selectedDate]);
 
     const handleSaveFoodLog = async () => {
         if (!canEditSelectedDate) {
@@ -1078,6 +1175,7 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
                                                 history={history}
                                                 isCompleted={isCompleted}
                                                 sets={exerciseSets}
+                                                lastSessionSets={getLastSessionSets(ex.name)}
                                                 inputValue={inputs[ex.id] || ''}
                                                 onInputChange={(val) => setInputs(prev => ({ ...prev, [ex.id]: val }))}
                                                 onLog={() => handleLog(ex)}
