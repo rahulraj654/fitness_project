@@ -155,11 +155,109 @@ const EXERCISE_GUIDE = {
     }
 };
 
+const WARMUP_GUIDE = {
+    "Arm Circles": {
+        steps: ["Stand tall, arms out", "Small circles forward (10x)", "Small circles backward (10x)", "Gradually increase size"],
+        focus: "Shoulder mobility",
+        videoTip: "Keep arms straight"
+    },
+    "Shoulder Shrugs": {
+        steps: ["Lift shoulders to ears", "Hold for 1s", "Drop them down completely", "Repeat"],
+        focus: "Release tension",
+        videoTip: "Don't roll, just up/down"
+    },
+    "Wall Slides": {
+        steps: ["Back against wall", "Arms in 'W' shape", "Slide hands up to 'Y'", "Keep elbows/wrists on wall"],
+        focus: "Posture correction",
+        videoTip: "Ribcage down"
+    },
+    "Leg Swings": {
+        steps: ["Hold wall for balance", "Swing one leg forward/back", "Keep torso still", "Switch sides"],
+        focus: "Hip mobility",
+        videoTip: "Control the swing"
+    },
+    "Hip Circles": {
+        steps: ["Hands on hips", "Rotate hips in big circle", "10x clockwise", "10x counter-clockwise"],
+        focus: "Loosen hips/lower back",
+        videoTip: "Think hula hoop"
+    },
+    "Cat-Cow": {
+        steps: ["Hands and knees", "Arch back up (Cat)", "Sink belly down (Cow)", "Move with breath"],
+        focus: "Spine flexibility",
+        videoTip: "Chin to chest in Cat"
+    },
+    "Scapular Squeezes": {
+        steps: ["Arms by sides", "Squeeze shoulder blades together", "Hold 2s", "Release"],
+        focus: "Back activation",
+        videoTip: "Don't shrug up"
+    },
+    "Jumping Jacks": {
+        steps: ["Jump feet out, hands up", "Jump feet in, hands down", "Stay light on toes", "Find a rhythm"],
+        focus: "Heart rate up",
+        videoTip: "Soft knees on landing"
+    }
+};
+
+const QUOTES = [
+    "The only bad workout is the one that didn't happen.",
+    "Action is the foundational key to all success.",
+    "Don't stop when you're tired. Stop when you're done.",
+    "Your future is created by what you do today, not tomorrow.",
+    "Sweat is just fat crying.",
+    "Discipline is doing what needs to be done, even if you don't want to.",
+    "A one-hour workout is only 4% of your day. No excuses.",
+    "Fitness is not about being better than someone else. It's about being better than you were yesterday."
+];
+
 const routines = {
-    1: { name: "Upper Push", subtitle: "Chest & Shoulders", icon: "💪", warmup: ["20 arm circles", "10 shoulder shrugs", "10 wall slides"], exercises: [{ id: "incline_pushups", name: "Incline Pushups", target: "3 x 10-12", sets: 3, reps: "10-12", type: "BW", tempo: "2-1-2", rest: 60 }, { id: "db_overhead_press", name: "DB Overhead Press", target: "3 x 12-15", sets: 3, reps: "12-15", type: "DB", weight: 2, tempo: "2-1-2", rest: 60 }, { id: "db_lateral_raises", name: "DB Lateral Raises", target: "3 x 12-15", sets: 3, reps: "12-15", type: "DB", weight: 2, tempo: "2-1-3", rest: 45 }], cooldown: ["30s chest stretch each side", "30s shoulder stretch each side"] },
-    2: { name: "Lower Body", subtitle: "Legs & Glutes", icon: "🦵", warmup: ["20 leg swings each side", "10 hip circles", "10 bodyweight squats"], exercises: [{ id: "bodyweight_squats", name: "Bodyweight Squats", target: "3 x 15-20", sets: 3, reps: "15-20", type: "BW", tempo: "3-1-2", rest: 60 }, { id: "lunges", name: "Lunges", target: "3 x 10/leg", sets: 3, reps: "10 each", type: "BW", tempo: "2-1-1", rest: 60 }, { id: "glute_bridges", name: "Glute Bridges", target: "3 x 15", sets: 3, reps: "15", type: "BW", tempo: "2-2-1", rest: 45 }, { id: "calf_raises", name: "Calf Raises", target: "3 x 20", sets: 3, reps: "20", type: "BW", tempo: "2-1-2", rest: 30 }], cooldown: ["30s quad stretch each side", "30s hamstring stretch", "30s calf stretch each side"] },
-    4: { name: "Upper Pull", subtitle: "Back & Biceps", icon: "🎯", warmup: ["10 cat-cow stretches", "20 arm circles", "10 scapular squeezes"], exercises: [{ id: "db_rows", name: "DB Rows", target: "3 x 12/arm", sets: 3, reps: "12 each", type: "DB", weight: 2, tempo: "2-1-3", rest: 60 }, { id: "db_bicep_curls", name: "DB Bicep Curls", target: "3 x 12-15", sets: 3, reps: "12-15", type: "DB", weight: 2, tempo: "2-1-3", rest: 45 }, { id: "plank", name: "Plank", target: "3 x 30-45s", sets: 3, reps: "30-45s", type: "BW", rest: 45 }], cooldown: ["30s lat stretch each side", "30s bicep stretch", "30s lower back twist each side"] },
-    5: { name: "Full Body", subtitle: "Compound Focus", icon: "⚡", warmup: ["Jumping jacks 30s", "Arm circles 20", "Leg swings 10 each"], exercises: [{ id: "knee_pushups", name: "Knee Pushups", target: "3 x 10-12", sets: 3, reps: "10-12", type: "BW", tempo: "2-1-2", rest: 60 }, { id: "bodyweight_squats2", name: "Bodyweight Squats", target: "3 x 15", sets: 3, reps: "15", type: "BW", tempo: "3-1-1", rest: 60 }, { id: "db_rows2", name: "DB Rows", target: "3 x 10/arm", sets: 3, reps: "10 each", type: "DB", weight: 2, tempo: "2-1-2", rest: 45 }, { id: "glute_bridges2", name: "Glute Bridges", target: "3 x 12", sets: 3, reps: "12", type: "BW", tempo: "2-2-1", rest: 45 }], cooldown: ["Full body stretch 2 minutes"] }
+    1: {
+        name: "Upper Push",
+        subtitle: "Chest & Shoulders",
+        icon: "💪",
+        warmup: [
+            { name: "Arm Circles", target: "20 reps" },
+            { name: "Shoulder Shrugs", target: "10 reps" },
+            { name: "Wall Slides", target: "10 reps" }
+        ],
+        exercises: [{ id: "incline_pushups", name: "Incline Pushups", target: "3 x 10-12", sets: 3, reps: "10-12", type: "BW", tempo: "2-1-2", rest: 60 }, { id: "db_overhead_press", name: "DB Overhead Press", target: "3 x 12-15", sets: 3, reps: "12-15", type: "DB", weight: 2, tempo: "2-1-2", rest: 60 }, { id: "db_lateral_raises", name: "DB Lateral Raises", target: "3 x 12-15", sets: 3, reps: "12-15", type: "DB", weight: 2, tempo: "2-1-3", rest: 45 }],
+        cooldown: ["30s chest stretch each side", "30s shoulder stretch each side"]
+    },
+    2: {
+        name: "Lower Body",
+        subtitle: "Legs & Glutes",
+        icon: "🦵",
+        warmup: [
+            { name: "Leg Swings", target: "20/side" },
+            { name: "Hip Circles", target: "10 reps" },
+            { name: "Bodyweight Squats", target: "10 reps" }
+        ],
+        exercises: [{ id: "bodyweight_squats", name: "Bodyweight Squats", target: "3 x 15-20", sets: 3, reps: "15-20", type: "BW", tempo: "3-1-2", rest: 60 }, { id: "lunges", name: "Lunges", target: "3 x 10/leg", sets: 3, reps: "10 each", type: "BW", tempo: "2-1-1", rest: 60 }, { id: "glute_bridges", name: "Glute Bridges", target: "3 x 15", sets: 3, reps: "15", type: "BW", tempo: "2-2-1", rest: 45 }, { id: "calf_raises", name: "Calf Raises", target: "3 x 20", sets: 3, reps: "20", type: "BW", tempo: "2-1-2", rest: 30 }],
+        cooldown: ["30s quad stretch each side", "30s hamstring stretch", "30s calf stretch each side"]
+    },
+    4: {
+        name: "Upper Pull",
+        subtitle: "Back & Biceps",
+        icon: "🎯",
+        warmup: [
+            { name: "Cat-Cow", target: "10 reps" },
+            { name: "Arm Circles", target: "20 reps" },
+            { name: "Scapular Squeezes", target: "10 reps" }
+        ],
+        exercises: [{ id: "db_rows", name: "DB Rows", target: "3 x 12/arm", sets: 3, reps: "12 each", type: "DB", weight: 2, tempo: "2-1-3", rest: 60 }, { id: "db_bicep_curls", name: "DB Bicep Curls", target: "3 x 12-15", sets: 3, reps: "12-15", type: "DB", weight: 2, tempo: "2-1-3", rest: 45 }, { id: "plank", name: "Plank", target: "3 x 30-45s", sets: 3, reps: "30-45s", type: "BW", rest: 45 }],
+        cooldown: ["30s lat stretch each side", "30s bicep stretch", "30s lower back twist each side"]
+    },
+    5: {
+        name: "Full Body",
+        subtitle: "Compound Focus",
+        icon: "⚡",
+        warmup: [
+            { name: "Jumping Jacks", target: "30s" },
+            { name: "Arm Circles", target: "20 reps" },
+            { name: "Leg Swings", target: "10/side" }
+        ],
+        exercises: [{ id: "knee_pushups", name: "Knee Pushups", target: "3 x 10-12", sets: 3, reps: "10-12", type: "BW", tempo: "2-1-2", rest: 60 }, { id: "bodyweight_squats2", name: "Bodyweight Squats", target: "3 x 15", sets: 3, reps: "15", type: "BW", tempo: "3-1-1", rest: 60 }, { id: "db_rows2", name: "DB Rows", target: "3 x 10/arm", sets: 3, reps: "10 each", type: "DB", weight: 2, tempo: "2-1-2", rest: 45 }, { id: "glute_bridges2", name: "Glute Bridges", target: "3 x 12", sets: 3, reps: "12", type: "BW", tempo: "2-2-1", rest: 45 }],
+        cooldown: ["Full body stretch 2 minutes"]
+    }
 };
 
 const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -271,84 +369,156 @@ const DailyBriefing = ({ routineName, briefing, onOpenGlossary }) => {
     );
 };
 
+const DailyQuote = () => {
+    const [quote, setQuote] = useState("");
+
+    useEffect(() => {
+        // Simple distinct quote based on date to avoid random jumping
+        const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
+        setQuote(QUOTES[dayOfYear % QUOTES.length]);
+    }, []);
+
+    return (
+        <div className="bg-slate-50 border-l-4 border-neon-green p-4 rounded-r-xl mb-8 animate-fade-in-up">
+            <div className="flex gap-3">
+                <div className="text-neon-green"><Lightbulb size={24} /></div>
+                <div>
+                    <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Daily Fuel</h4>
+                    <p className="text-slate-700 italic font-medium leading-relaxed">"{quote}"</p>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const WarmupItem = ({ item, onClick }) => {
+    const guide = WARMUP_GUIDE[item.name] || EXERCISE_GUIDE[item.name];
+    const [isOpen, setIsOpen] = useState(false);
+
+    return (
+        <div className="relative">
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                className={`w-full text-left transition-all ${isOpen ? 'bg-slate-800 text-white ring-2 ring-slate-800' : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-100'} p-3 rounded-xl flex flex-col gap-1 shadow-sm`}>
+                <div className="flex justify-between items-center w-full">
+                    <span className="font-bold text-sm">{item.name}</span>
+                    <span className={`text-[10px] uppercase font-black px-2 py-0.5 rounded ${isOpen ? 'bg-neon-green text-slate-900' : 'bg-slate-100 text-slate-500'}`}>{item.target}</span>
+                </div>
+                {isOpen && guide && (
+                    <div className="mt-3 pt-3 border-t border-slate-700/50 animate-fade-in text-xs space-y-2">
+                        {guide.steps && (
+                            <ul className="space-y-1">
+                                {guide.steps.map((s, i) => <li key={i} className="flex gap-2 text-slate-300"><span className="text-neon-green">•</span> {s}</li>)}
+                            </ul>
+                        )}
+                        {guide.focus && <p className="text-slate-400">Focus: <span className="text-white">{guide.focus}</span></p>}
+                        {guide.videoTip && <p className="text-slate-400">Tip: <span className="text-white italic">{guide.videoTip}</span></p>}
+                    </div>
+                )}
+            </button>
+        </div>
+    );
+};
+
 const ExerciseCard = ({ exercise, guide, history, sets, onLog, onDeleteSet, inputValue, onInputChange, onStartRest, isCompleted, onOpenGlossary }) => {
     const [expanded, setExpanded] = useState(false);
 
     return (
         <div className={`glass-card overflow-hidden transition-all duration-300 ${isCompleted ? 'border-neon-green bg-green-50/50 shadow-lg shadow-green-500/10' : ''}`}>
             {/* Header */}
-            <div className="p-4 md:p-6">
-                <div className="flex justify-between items-start gap-3 mb-4">
+            <div className="p-4 md:p-5">
+                <div className="flex justify-between items-start gap-3 mb-3">
                     <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                            {guide?.difficulty === "Beginner" && <span className="badge bg-green-100 text-green-700">BEGINNER</span>}
-                            {isCompleted && <span className="badge bg-neon-green text-slate-900 flex items-center gap-1"><CheckCircle2 size={10} /> DONE</span>}
+                        <div className="flex items-center gap-2 mb-1">
+                            {guide?.difficulty === "Beginner" && <span className="badge bg-green-100 text-green-700 text-[10px] px-2 py-0.5">BEGINNER</span>}
+                            {isCompleted && <span className="badge bg-neon-green text-slate-900 flex items-center gap-1 text-[10px] px-2 py-0.5"><CheckCircle2 size={10} /> DONE</span>}
                         </div>
-                        <h3 className="text-xl md:text-2xl font-black text-slate-900 leading-tight">{exercise.name}</h3>
+                        <h3 className="text-lg md:text-xl font-black text-slate-900 leading-tight">{exercise.name}</h3>
                     </div>
                 </div>
 
-                {/* Target & Stats - Simplified for Beginners */}
-                <div className="grid grid-cols-2 gap-3 mb-4">
-                    <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100">
-                        <div className="text-[10px] font-bold text-slate-400 uppercase mb-1 flex items-center justify-between">
-                            Get This Done {onOpenGlossary && <Info size={12} className="text-slate-300 cursor-pointer" onClick={(e) => { e.stopPropagation(); onOpenGlossary(); }} />}
-                        </div>
+                {/* Target & Stats - Compact Grid */}
+                <div className="grid grid-cols-2 gap-2 mb-3">
+                    <div className="bg-slate-50 p-2 rounded-xl border border-slate-100 flex flex-col justify-center">
+                        <div className="text-[9px] font-bold text-slate-400 uppercase mb-0.5">Goal</div>
                         <div className="flex items-baseline gap-1">
-                            <span className="text-lg font-black text-slate-900">{exercise.sets}</span>
-                            <span className="text-xs font-bold text-slate-500">sets</span>
+                            <span className="text-sm font-black text-slate-900">{exercise.sets}</span>
+                            <span className="text-[10px] font-bold text-slate-500">sets</span>
                             <span className="text-slate-300 mx-1">×</span>
-                            <span className="text-lg font-black text-slate-900">{exercise.reps}</span>
-                            <span className="text-xs font-bold text-slate-500">reps</span>
+                            <span className="text-sm font-black text-slate-900">{exercise.reps}</span>
+                            <span className="text-[10px] font-bold text-slate-500">reps</span>
                         </div>
                     </div>
                     {exercise.tempo && (
-                        <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100">
-                            <div className="text-[10px] font-bold text-slate-400 uppercase mb-1 flex items-center justify-between">
-                                Tempo {onOpenGlossary && <Info size={12} className="text-slate-300 cursor-pointer" onClick={(e) => { e.stopPropagation(); onOpenGlossary(); }} />}
+                        <div className="bg-slate-50 p-2 rounded-xl border border-slate-100 flex flex-col justify-center">
+                            <div className="text-[9px] font-bold text-slate-400 uppercase mb-0.5 flex items-center justify-between">
+                                Tempo {onOpenGlossary && <Info size={10} className="text-slate-300 cursor-pointer" onClick={(e) => { e.stopPropagation(); onOpenGlossary(); }} />}
                             </div>
-                            <div className="text-lg font-black text-slate-900">{exercise.tempo}</div>
+                            <div className="text-sm font-black text-slate-900">{exercise.tempo}</div>
                         </div>
                     )}
                 </div>
 
-                {/* Guide Button - MORE PROMINENT */}
-                <button
-                    onClick={() => setExpanded(!expanded)}
-                    className={`w-full py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all border-2
-                        ${expanded
-                            ? 'bg-slate-100 border-slate-200 text-slate-600'
-                            : 'bg-white border-blue-100 text-blue-600 shadow-sm hover:border-blue-200 hover:bg-blue-50'}`}
-                >
-                    {expanded ? "Close Guide" : "Show How-To Guide"}  {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                </button>
+                {/* Action Bar: Input + Log + Guide Toggle */}
+                <div className="flex items-stretch gap-2 h-12">
+                    <button
+                        onClick={() => setExpanded(!expanded)}
+                        className={`px-3 rounded-xl flex items-center justify-center transition-all border
+                            ${expanded
+                                ? 'bg-slate-100 border-slate-200 text-slate-600'
+                                : 'bg-white border-blue-100 text-blue-600 hover:bg-blue-50'}`}
+                    >
+                        {expanded ? <ChevronUp size={20} /> : <HelpCircle size={20} />}
+                    </button>
 
-                {/* Expanded Guide */}
+                    <div className="flex-1 relative">
+                        <input
+                            type="number"
+                            placeholder="Reps"
+                            value={inputValue}
+                            onChange={(e) => onInputChange(e.target.value)}
+                            className="w-full h-full bg-slate-50 border border-slate-200 rounded-xl px-4 text-slate-900 font-black text-center text-lg focus:outline-none focus:ring-2 focus:ring-neon-green/50 focus:border-neon-green focus:bg-white transition-all placeholder:text-slate-300 placeholder:font-medium placeholder:text-sm"
+                        />
+                    </div>
+
+                    <button onClick={onLog} className={`px-4 md:px-6 rounded-xl font-bold transition-all active:scale-95 flex items-center gap-2 shadow-lg shadow-neon-green/10 whitespace-nowrap
+                        ${isCompleted ? 'bg-neon-green text-slate-900 hover:bg-slate-800 hover:text-white' : 'bg-slate-900 text-white hover:bg-neon-green hover:text-slate-900'}`}>
+                        {isCompleted ? <CheckCircle2 size={20} /> : "Log"}
+                    </button>
+
+                    {exercise.rest && (
+                        <button onClick={() => onStartRest(exercise.rest)} className="px-3 bg-slate-100 text-slate-500 rounded-xl hover:bg-blue-100 hover:text-blue-600 transition-all">
+                            <Clock size={20} />
+                        </button>
+                    )}
+                </div>
+
+                {/* Guide Section */}
                 {expanded && guide && (
-                    <div className="mt-4 space-y-4 animate-fade-in-up">
+                    <div className="mt-4 pt-4 border-t border-slate-100 animate-fade-in">
                         {/* Step by Step */}
-                        <div className="bg-blue-50/80 rounded-2xl p-5 border border-blue-100">
-                            <h4 className="text-sm font-black text-blue-800 uppercase mb-4 flex items-center gap-2">
-                                <Play size={16} /> Steps
+                        <div className="mb-4">
+                            <h4 className="text-xs font-black text-slate-900 uppercase mb-2 flex items-center gap-2">
+                                <Play size={12} className="text-blue-500" /> How To
                             </h4>
-                            <ol className="space-y-4">
+                            <ol className="space-y-3">
                                 {guide.steps.map((step, i) => (
-                                    <li key={i} className="flex gap-4 text-sm text-slate-700 leading-relaxed font-medium">
-                                        <span className="w-6 h-6 bg-white rounded-full flex items-center justify-center text-xs font-black text-blue-600 shadow-sm flex-shrink-0 border border-blue-100">{i + 1}</span>
+                                    <li key={i} className="flex gap-3 text-xs md:text-sm text-slate-600 leading-relaxed font-medium">
+                                        <span className="w-5 h-5 bg-blue-50 rounded-full flex items-center justify-center text-[10px] font-black text-blue-600 flex-shrink-0">{i + 1}</span>
                                         <span>{step}</span>
                                     </li>
                                 ))}
                             </ol>
                         </div>
-                        {/* Mistakes & Feel */}
-                        <div className="bg-amber-50/80 rounded-2xl p-5 border border-amber-100">
-                            <h4 className="text-sm font-black text-amber-800 uppercase mb-3 flex items-center gap-2">
-                                <AlertTriangle size={16} /> Watch Out
+                        {/* Mistakes */}
+                        <div className="bg-amber-50 rounded-xl p-3">
+                            <h4 className="text-[10px] font-black text-amber-800 uppercase mb-2 flex items-center gap-1">
+                                <AlertTriangle size={10} /> Watch Out
                             </h4>
-                            <ul className="space-y-2">
+                            <ul className="space-y-1">
                                 {guide.mistakes.map((m, i) => (
-                                    <li key={i} className="text-sm text-slate-700 flex items-start gap-2">
-                                        <span className="text-amber-500 font-bold">•</span> {m}
+                                    <li key={i} className="text-xs text-amber-900/80 flex items-start gap-2">
+                                        <span className="text-amber-500">•</span> {m}
                                     </li>
                                 ))}
                             </ul>
@@ -357,42 +527,19 @@ const ExerciseCard = ({ exercise, guide, history, sets, onLog, onDeleteSet, inpu
                 )}
             </div>
 
-            {/* Input Section */}
-            <div className={`p-4 md:p-6 pt-0 flex gap-3 ${isCompleted ? 'bg-green-50/50' : ''}`}>
-                <input
-                    type="number"
-                    placeholder="Reps done"
-                    value={inputValue}
-                    onChange={(e) => onInputChange(e.target.value)}
-                    className="flex-1 bg-white border-2 border-slate-100 rounded-xl py-3 px-4 text-slate-900 font-bold text-center text-lg focus:outline-none focus:ring-2 focus:ring-neon-green/30 focus:border-neon-green touch-target shadow-sm"
-                />
-                <button onClick={onLog} className={`px-6 rounded-xl font-bold transition-all active:scale-95 touch-target flex items-center gap-2 shadow-lg shadow-neon-green/20
-                    ${isCompleted ? 'bg-neon-green text-slate-900 hover:bg-slate-900 hover:text-white' : 'bg-slate-900 text-white hover:bg-neon-green hover:text-slate-900'}`}>
-                    <CheckCircle2 size={24} /> {isCompleted ? "Log Another" : "Log Set"}
-                </button>
-                {exercise.rest && (
-                    <button onClick={() => onStartRest(exercise.rest)} className="px-4 bg-slate-100 text-slate-500 rounded-xl hover:bg-blue-100 hover:text-blue-600 transition-all touch-target">
-                        <Clock size={24} />
-                    </button>
-                )}
-            </div>
-
-            {/* Sets List */}
+            {/* Sets List - Compact */}
             {sets && sets.length > 0 && (
-                <div className="px-4 md:px-6 pb-6 space-y-2">
-                    <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Logged Sets</div>
-                    {sets.map((set, i) => (
-                        <div key={set.id || i} className="flex justify-between items-center bg-white border border-slate-100 rounded-xl p-3 shadow-sm">
-                            <div className="flex items-center gap-3">
-                                <span className="w-6 h-6 bg-slate-100 rounded-full flex items-center justify-center text-xs font-bold text-slate-500">{i + 1}</span>
-                                <span className="font-bold text-slate-900">{set.reps} reps</span>
-                                {set.weight > 0 && <span className="text-sm text-slate-500">@ {set.weight}kg</span>}
+                <div className="bg-slate-50/50 px-4 py-3 border-t border-slate-100">
+                    <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                        {sets.map((set, i) => (
+                            <div key={set.id || i} className="flex items-center gap-2 bg-white border border-slate-100 rounded-lg px-2 py-1.5 shadow-sm flex-shrink-0">
+                                <span className="text-xs font-bold text-slate-900">{set.reps} reps</span>
+                                <button onClick={() => onDeleteSet(set.id)} className="text-slate-300 hover:text-red-500 transition-colors">
+                                    <X size={12} />
+                                </button>
                             </div>
-                            <button onClick={() => onDeleteSet(set.id)} className="text-slate-400 hover:text-red-500 p-2 transition-colors">
-                                <X size={16} />
-                            </button>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
             )}
         </div>
@@ -608,14 +755,17 @@ const Dashboard = ({ user, dailyLogs, workoutHistory, onUpdateFoodLog, onLogWork
                             </div>
                         ) : (
                             <div className="space-y-8">
-                                {/* DAILY BRIEFING */}
+                                {/* DAILY BRIEFING & QUOTE */}
+                                <DailyQuote />
                                 <DailyBriefing routineName={routine.name} briefing={DAILY_BRIEFINGS[routine.name]} onOpenGlossary={() => setShowGlossary(true)} />
 
-                                {/* Warmup */}
-                                <div className="bg-orange-50 rounded-2xl p-6 border border-orange-100">
-                                    <h4 className="text-xs font-black text-orange-600 uppercase mb-4 flex items-center gap-2 tracking-wide"><Flame size={16} /> Warmup</h4>
-                                    <div className="flex flex-wrap gap-3">
-                                        {routine.warmup.map((w, i) => (<span key={i} className="bg-white px-4 py-2 rounded-xl text-sm font-bold text-slate-600 border border-slate-100">{w}</span>))}
+                                {/* Warmup - Replaced text pills with Interactive Cards */}
+                                <div className="bg-slate-900/5 rounded-3xl p-6 mb-8">
+                                    <h4 className="text-xs font-black text-slate-500 uppercase mb-4 flex items-center gap-2 tracking-wide"><Flame size={16} /> Warmup Flow</h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                        {routine.warmup.map((w, i) => (
+                                            <WarmupItem key={i} item={w} />
+                                        ))}
                                     </div>
                                 </div>
 
